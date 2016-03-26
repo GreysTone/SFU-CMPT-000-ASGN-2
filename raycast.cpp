@@ -11,8 +11,6 @@
  *  Template code for drawing a scene using raycasting.
  *  Some portions of the code was originally written by 
  *  M. vandePanne - and then modified by R. Zhang & H. Li
- *  
- *  Implemented by Danyang Song (Arthur)
 ***********************************************************/
 
 #include "include/Angel.h"
@@ -242,7 +240,7 @@ int main( int argc, char **argv )
 	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE );
 	glutInitWindowSize( WIN_WIDTH, WIN_HEIGHT );
 	glutCreateWindow( "Ray tracing" );
-//	glewInit();q
+	glewInit();
 	init();
 
 	glutDisplayFunc( display );
