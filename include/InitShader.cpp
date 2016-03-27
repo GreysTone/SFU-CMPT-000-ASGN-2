@@ -1,7 +1,6 @@
 
-#include "Angel.h"
-
-namespace Angel {
+//#include "Angel.h"
+#include "shader.h"
 
 // Create a NULL-terminated string by reading the provided file
 static char*
@@ -93,5 +92,3 @@ InitShader(const char* vShaderFile, const char* fShaderFile)
 
     return program;
 }
-
-}  // Close namespace Angel block

@@ -17,7 +17,7 @@ INCLUDEDIR=/usr/include/
 LIBDIR=/usr/lib
 
 # If you have more source files add them here 
-SOURCE= scene.cpp image_util.cpp sphere.cpp vector.cpp trace.cpp raycast.cpp include/InitShader.cpp gtArgument.cpp gtModel.cpp
+SOURCE= sphere.cpp vector.cpp raycast.cpp include/InitShader.cpp gtObject.cpp gtScene.cpp gtTracer.cpp
 
 # The compiler we are using 
 CC= g++
@@ -25,7 +25,7 @@ CC= g++
 # The flags that will be used to compile the object file.
 # If you want to debug your program,
 # you can add '-g' on the following line
-CFLAGS= -O3 -g -Wall -pedantic -DGL_GLEXT_PROTOTYPES
+CFLAGS= -O3 -g -Wall -pedantic -DGL_GLEXT_PROTOTYPES -std=c++0x
 
 # The name of the final executable 
 EXECUTABLE= raycast
