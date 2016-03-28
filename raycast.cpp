@@ -248,7 +248,6 @@ int main(int argc, char **argv) {
 //    set_up_user_scene();
 //  else
 //    set_up_default_scene();
-  //TODO: enforce using default scene
 //  set_up_default_scene();
 
   // maximum level of recursions
@@ -256,7 +255,7 @@ int main(int argc, char **argv) {
 
   // Optional arguments
   for (int i = 3; i < argc; i++) {
-    if (strcmp(argv[i], "-s") == 0) options |= SHADOW;
+    if (strcmp(argv[i], "+s") == 0) options |= SHADOW;
   }
 
   tracer->setConfiguration((GTTracerSetting)options);

@@ -12,7 +12,7 @@ GTTracer::GTTracer() {
   userSceneActived = false;
   shadowActived = false;
 
-  maxStep = 1;
+  maxStep = 0;
   scene = new GTScene;
 
   win_width = WIN_WIDTH;
@@ -88,10 +88,17 @@ void GTTracer::traceRay() {
         vec3 vecProject = scene->eye_pos - pointSurf;
         vec3 normProject = glm::normalize(vecProject);
 
+        // features
+        if(shadowActived) {
+          float shadowCoefficient = 1.0f;
+          if(scene->intersectScene(pointSurf, normLight, JMP, JMP)) shadowCoefficient = 0.0f;
+          decayCoefficient *= shadowCoefficient;
+        }
+
         // calculate color
         vec3 Ambient = obj->ambient * scene->global_ambient;
-        vec3 Diffuse = decayCoefficient  * obj->diffuse * max(glm::dot(normLight, normSurf), 0.0f);
-        vec3 Specular = decayCoefficient * obj->specular *
+        vec3 Diffuse = decayCoefficient * light.intensity  * obj->diffuse * max(glm::dot(normLight, normSurf), 0.0f);
+        vec3 Specular = decayCoefficient * light.intensity * obj->specular *
             (float)pow(max(glm::dot(normReflect, normProject), 0.0f), obj->shineness);
         ret_color = Ambient + Diffuse + Specular;
 

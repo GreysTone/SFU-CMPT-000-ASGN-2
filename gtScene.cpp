@@ -76,7 +76,7 @@ void GTScene::buildDefaultScene() {
  * which arguments to use for the function. For example, note that you
  * should return the point of intersection to the calling function.
  **********************************************************************/
-void GTScene::intersectScene(vec3 eye, vec3 ray, int i, int j) {
+bool GTScene::intersectScene(vec3 eye, vec3 ray, int i, int j) {
 //  std::cout << "eye:";
 //  GTCalc::printVector(eye);
 //  std::cout << "ray:";
@@ -89,11 +89,11 @@ void GTScene::intersectScene(vec3 eye, vec3 ray, int i, int j) {
     matcher.value = (*it).intersect(eye, ray, &(matcher.point));
     matcher.it = it;
 //    GTCalc::printVector(matcher.point);
-    std::cout << "\t" << matcher.value << "\n";
+//    std::cout << "\t" << matcher.value << "\n";
     if(matcher.value >= GTCalc::precision /*&& /*matcher.value <= OVER_RANGE && */
         /*finite(matcher.value) && !isnan(matcher.value)*/)   matchBox.push_back(matcher);
   }
-  std::cout << "\n";
+//  std::cout << "\n";
 
   vec3 minPoint;
   float minValue;
@@ -116,7 +116,11 @@ void GTScene::intersectScene(vec3 eye, vec3 ray, int i, int j) {
     minIt = modelList.end();
   }
 
-  depthPoint[i][j] = minPoint;
-  depthValue[i][j] = minValue;
-  depthObject[i][j] = minIt;
+  if(i != JMP || j != JMP) {
+    depthPoint[i][j] = minPoint;
+    depthValue[i][j] = minValue;
+    depthObject[i][j] = minIt;
+  }
+  if(minIt == modelList.end()) return false;
+  else return true;
 }

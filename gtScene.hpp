@@ -56,7 +56,7 @@ public:
   void buildDefaultScene();
 
 //  void intersectScene(vec3 eye, vec3 ray, vec3 *intersectPoint, float *value);
-  void intersectScene(vec3 eye, vec3 ray, int i, int j);
+  bool intersectScene(vec3 eye, vec3 ray, int i, int j);
 };
 
 #endif /* gtScene_hpp */
