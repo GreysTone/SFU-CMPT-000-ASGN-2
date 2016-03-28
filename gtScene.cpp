@@ -73,28 +73,54 @@ void GTScene::buildDefaultScene() {
 /*********************************************************************
  * This function returns a pointer to the sphere object that the
  * ray intersects first; NULL if no intersection. You should decide
- * which arguments to use for the function. For exmaple, note that you
+ * which arguments to use for the function. For example, note that you
  * should return the point of intersection to the calling function.
  **********************************************************************/
 void GTScene::intersectScene(vec3 eye, vec3 ray, int i, int j) {
-  vec3 tmpPoint, minPoint;
-  float tmpValue, minValue;
+  vec3 minPoint;
+  float minValue = 0;
   std::list<GTSphere>::iterator minIterator;
 
-  (modelList.begin())->intersect(eye, ray, &tmpPoint, &tmpValue);
-  minPoint = tmpPoint;
-  minValue = tmpValue;
+  typedef struct BOX {
+    vec3 point;
+    float value;
+    std::list<GTSphere>::iterator it;
+  } matchBox;
 
-  for (std::list<GTSphere>::iterator it = modelList.begin(); it != modelList.end(); it++) {
-    if(it == modelList.begin()) continue;
-    (*it).intersect(eye, ray, &tmpPoint, &tmpValue);
-    if (tmpValue < minValue) {
-      minValue = tmpValue;
-      minPoint = tmpPoint;
-      minIterator = it;
-    }
+  matchBox *m = new matchBox[modelList.size()];
+  unsigned int mItea = 0, collision = 0;
+  for (std::list<GTSphere>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
+    (*it).intersect(eye, ray, &(m[mItea].point), &(m[mItea].value));
+    std::cout << "\t" << i << " " << j << ":" << m[mItea].value << std::endl;
+    if(m[mItea].value > -1.0f) collision++;
+    m[mItea].it = it;
+    mItea++;
   }
 
-  depthObject[i][j] = minIterator;
-  depthPoint[i][j] = minPoint;
+  if(collision == 0) {
+    depthObject[i][j] = modelList.end();
+    depthPoint[i][j] = vec3(0.0, 0.0, 0.0);
+    depthValue[i][j] = -10.0f;
+  } else {
+    float detectMax = -1.0f;
+    for(mItea = 0; mItea < modelList.size(); ++mItea)
+      if(m[mItea].value > detectMax) detectMax = m[mItea].value;
+    detectMax += 10.0f;
+    for(mItea = 0; mItea < modelList.size(); ++mItea)
+      if(m[mItea].value < 0) m[mItea].value = detectMax;
+    minValue = detectMax;
+    for(mItea = 0; mItea < modelList.size(); ++mItea) {
+//      std::cout << "\t" << i << " " << j << ":" << m[mItea].value << std::endl;
+      if(m[mItea].value < minValue) {
+        minValue = m[mItea].value;
+        minPoint = m[mItea].point;
+        minIterator = m[mItea].it;
+      }
+    }
+
+    depthObject[i][j] = minIterator;
+    depthPoint[i][j] = minPoint;
+    depthValue[i][j] = minValue;
+  }
+  delete[] m;
 }

@@ -33,6 +33,7 @@ public:
   std::list<GTSphere> modelList;
   std::list<GTSphere>::iterator depthObject[WIN_HEIGHT][WIN_WIDTH];
   vec3 depthPoint[WIN_HEIGHT][WIN_WIDTH];
+  float depthValue[WIN_HEIGHT][WIN_WIDTH];
 
   GTScene();
 

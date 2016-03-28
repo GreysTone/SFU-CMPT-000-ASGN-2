@@ -41,7 +41,6 @@ public:
   float shineness;
   float reflectance;
 
-  virtual vec3 normal(vec3 point);
   virtual bool intersect(vec3 eye, vec3 ray, vec3 *hit);
 };
 

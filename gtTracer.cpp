@@ -27,15 +27,15 @@ void GTTracer::setMaxStep(int arg) {
 }
 
 void GTTracer::setConfiguration(GTTracerSetting arg) {
-  if (arg & 1)  userSceneActived = true;
-  else          userSceneActived = false;
+  if (arg & 1) userSceneActived = true;
+  else userSceneActived = false;
 
-  if (arg & 2)  shadowActived = true;
-  else          shadowActived = false;
+  if (arg & 2) shadowActived = true;
+  else shadowActived = false;
 }
 
 void GTTracer::buildScene() {
-  if(userSceneActived) scene->buildUserScene();
+  if (userSceneActived) scene->buildUserScene();
   else scene->buildDefaultScene();
 }
 
@@ -63,7 +63,6 @@ void GTTracer::traceRay() {
   cur_pixel_pos.z = scene->image_plane;
 
 
-
   for (i = 0; i < win_height; i++) {
     for (j = 0; j < win_width; j++) {
 //        ray = get_vec(eye_pos, cur_pixel_pos);
@@ -71,16 +70,28 @@ void GTTracer::traceRay() {
 
       scene->intersectScene(scene->eye_pos, ray, i, j);
 
-      vec3 surfPoint = scene->depthPoint[i][j];
-      vec3 vecLight = scene->lightList.begin()->position - surfPoint;
-      vec3 surfNormal = scene->depthObject[i][j]->normal(surfPoint);
+      if (scene->depthValue[i][j] > 0) {
+        std::cout << i << "-" << j << ":" <<  scene->depthValue[i][j] << std::endl;
+        vec3 pointSurf = scene->depthPoint[i][j];
+        std::list<GTSphere>::iterator obj = scene->depthObject[i][j];
+        vec3 vecLight = scene->lightList.begin()->position - pointSurf;
+//        GTClac::printVector(pointSurf);
+//        vec3 normSurf = obj->normal(pointSurf);
+//        vec3 vecReflect = vecLight - (2 * glm::dot(vecLight, normSurf) * normSurf);
 
-      //
+        vec3 Ambient = obj->ambient * scene->global_ambient;
+//        GTClac::printVector(Ambient);
+      } else {
+        ret_color = scene->background_color;
+      }
+
+
+      ////
       // You need to change this!!!
-      //
+
       // ret_color = recursive_ray_trace();
 //        ret_color = background_clr; // just background for now
-      ret_color = scene->background_color;
+//      ret_color = scene->background_color;
 
       // Parallel rays can be cast instead using below
       //
@@ -90,8 +101,10 @@ void GTTracer::traceRay() {
 
 // Checkboard for testing
 //        RGB_float clr = {float(i/32), 0, float(j/32)};
+#ifdef GT_TEST
       vec3 clr = vec3(float(i / 32), 0, float(j / 32));
       ret_color = clr;
+#endif
 
       frame[i][j][0] = GLfloat(ret_color.r);
       frame[i][j][1] = GLfloat(ret_color.g);
