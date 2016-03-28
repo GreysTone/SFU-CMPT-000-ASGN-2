@@ -39,6 +39,8 @@ void GTTracer::buildScene() {
   else scene->buildDefaultScene();
 }
 
+inline float max(float a, float b) { return a>b?a:b; }
+
 /*********************************************************************
 * This function traverses all the pixels and cast rays. It calls the
 * recursive ray tracer and assign return color to frame
@@ -70,17 +72,34 @@ void GTTracer::traceRay() {
 
       scene->intersectScene(scene->eye_pos, ray, i, j);
 
-      if (scene->depthValue[i][j] > 0) {
-        std::cout << i << "-" << j << ":" <<  scene->depthValue[i][j] << std::endl;
+      if (scene->depthValue[i][j] > GTCalc::precision) {
+//        std::cout << i << "-" << j << ":" <<  scene->depthValue[i][j] << std::endl;
+        std::list<GTLight>::iterator it = scene->lightList.begin();
+        GTLight &light = *(it);
         vec3 pointSurf = scene->depthPoint[i][j];
         std::list<GTSphere>::iterator obj = scene->depthObject[i][j];
-        vec3 vecLight = scene->lightList.begin()->position - pointSurf;
-//        GTClac::printVector(pointSurf);
-//        vec3 normSurf = obj->normal(pointSurf);
-//        vec3 vecReflect = vecLight - (2 * glm::dot(vecLight, normSurf) * normSurf);
 
+//        vec3 vecLight = ;
+        vec3 normLight = glm::normalize(light.position - pointSurf);
+        float distance = glm::length(light.position - pointSurf);
+        vec3 &decay = scene->decay;
+        float decayCoefficient = 1 / (decay.x + decay.y * distance + decay.z * distance * distance);
+
+        vec3 normSurf = glm::normalize(obj->normal(pointSurf));
+        vec3 vecReflect = (2 * glm::dot(normLight, normSurf) * normSurf) - normLight;
+        vec3 normReflect = glm::normalize(vecReflect);
+        vec3 vecProject = scene->eye_pos - pointSurf;
+        vec3 normProject = glm::normalize(vecProject);
+
+        // calculate color
         vec3 Ambient = obj->ambient * scene->global_ambient;
-//        GTClac::printVector(Ambient);
+//        GTCalc::printVector(Ambient);
+        vec3 Diffuse = decayCoefficient  * obj->diffuse * max(glm::dot(normLight, normSurf), 0.0f);
+        vec3 Specular = decayCoefficient * obj->specular * (float)pow(max(glm::dot(normReflect, normProject), 0.0f), obj->shineness);
+        ret_color = Ambient + Diffuse + Specular;
+//        ret_color = glm::normalize(ret_color);
+//        GTCalc::printVector(ret_color);
+
       } else {
         ret_color = scene->background_color;
       }

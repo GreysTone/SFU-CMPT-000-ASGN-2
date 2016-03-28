@@ -10,6 +10,7 @@
 #define gtScene_hpp
 
 #include <list>
+#include <vector>
 #include "include/glm/glm.hpp"
 #include "include/glm/gtc/matrix_transform.hpp"
 #include "include/glm/gtc/type_ptr.hpp"
@@ -17,6 +18,14 @@
 #include "global.h"
 
 using namespace glm;
+
+#define OVER_RANGE (1E+10)
+
+typedef struct match {
+  vec3 point;
+  float value;
+  std::list<GTSphere>::iterator it;
+} Match;
 
 class GTScene {
   vec3 null_color;

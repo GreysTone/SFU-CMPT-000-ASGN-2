@@ -6,7 +6,7 @@
 *.bmp
 
 core
-dataset
+data
 depend
 raycast
 

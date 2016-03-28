@@ -17,10 +17,11 @@
 
 using namespace glm;
 
-namespace GTClac {
+namespace GTCalc {
   extern float precision;
 
   void printVector(vec3 v);
+  inline float dot(vec3 v1, vec3 v2);
 }
 
 class GTObject {
@@ -40,8 +41,6 @@ public:
   vec3 specular;
   float shineness;
   float reflectance;
-
-  virtual bool intersect(vec3 eye, vec3 ray, vec3 *hit);
 };
 
 class GTSphere : public GTModel {
@@ -49,7 +48,7 @@ public:
   float radius;
 
   vec3 normal(vec3 surfPoint);
-  bool intersect(vec3 eye, vec3 ray, vec3 *hit, float *value);
+  float intersect(vec3 eye, vec3 ray, vec3 *hit);
 };
 
 #endif /* gtObject_hpp */

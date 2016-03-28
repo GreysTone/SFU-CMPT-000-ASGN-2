@@ -57,13 +57,13 @@ void GTScene::buildDefaultScene() {
   sphere[1].shineness = 6;
   sphere[1].reflectance = 0.3;
   // sphere 3
-  sphere[1].position = vec3(-0.35, 1.75, -2.25);
-  sphere[1].radius = 0.5;
-  sphere[1].ambient = vec3(0.2, 0.2, 0.2);
-  sphere[1].diffuse = vec3(0.0, 1.0, 0.25);
-  sphere[1].specular = vec3(0.0, 1.0, 0.0);
-  sphere[1].shineness = 30;
-  sphere[1].reflectance = 0.3;
+  sphere[2].position = vec3(-0.35, 1.75, -2.25);
+  sphere[2].radius = 0.5;
+  sphere[2].ambient = vec3(0.2, 0.2, 0.2);
+  sphere[2].diffuse = vec3(0.0, 1.0, 0.25);
+  sphere[2].specular = vec3(0.0, 1.0, 0.0);
+  sphere[2].shineness = 30;
+  sphere[2].reflectance = 0.3;
   // add sphere
   for (int i = 0; i < 3; i++) {
     addModel(sphere[i]);
@@ -77,50 +77,46 @@ void GTScene::buildDefaultScene() {
  * should return the point of intersection to the calling function.
  **********************************************************************/
 void GTScene::intersectScene(vec3 eye, vec3 ray, int i, int j) {
-  vec3 minPoint;
-  float minValue = 0;
-  std::list<GTSphere>::iterator minIterator;
+//  std::cout << "eye:";
+//  GTCalc::printVector(eye);
+//  std::cout << "ray:";
+//  GTCalc::printVector(ray);
 
-  typedef struct BOX {
-    vec3 point;
-    float value;
-    std::list<GTSphere>::iterator it;
-  } matchBox;
 
-  matchBox *m = new matchBox[modelList.size()];
-  unsigned int mItea = 0, collision = 0;
+  std::vector<Match> matchBox;
   for (std::list<GTSphere>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
-    (*it).intersect(eye, ray, &(m[mItea].point), &(m[mItea].value));
-    std::cout << "\t" << i << " " << j << ":" << m[mItea].value << std::endl;
-    if(m[mItea].value > -1.0f) collision++;
-    m[mItea].it = it;
-    mItea++;
+    Match matcher;
+    matcher.value = (*it).intersect(eye, ray, &(matcher.point));
+    matcher.it = it;
+//    GTCalc::printVector(matcher.point);
+    std::cout << "\t" << matcher.value << "\n";
+    if(matcher.value >= GTCalc::precision /*&& /*matcher.value <= OVER_RANGE && */
+        /*finite(matcher.value) && !isnan(matcher.value)*/)   matchBox.push_back(matcher);
   }
+  std::cout << "\n";
 
-  if(collision == 0) {
-    depthObject[i][j] = modelList.end();
-    depthPoint[i][j] = vec3(0.0, 0.0, 0.0);
-    depthValue[i][j] = -10.0f;
-  } else {
-    float detectMax = -1.0f;
-    for(mItea = 0; mItea < modelList.size(); ++mItea)
-      if(m[mItea].value > detectMax) detectMax = m[mItea].value;
-    detectMax += 10.0f;
-    for(mItea = 0; mItea < modelList.size(); ++mItea)
-      if(m[mItea].value < 0) m[mItea].value = detectMax;
-    minValue = detectMax;
-    for(mItea = 0; mItea < modelList.size(); ++mItea) {
-//      std::cout << "\t" << i << " " << j << ":" << m[mItea].value << std::endl;
-      if(m[mItea].value < minValue) {
-        minValue = m[mItea].value;
-        minPoint = m[mItea].point;
-        minIterator = m[mItea].it;
+  vec3 minPoint;
+  float minValue;
+  std::list<GTSphere>::iterator minIt;
+  if(!matchBox.empty()) {
+    minPoint = matchBox.begin()->point;
+    minValue = matchBox.begin()->value;
+    minIt = matchBox.begin()->it;
+    for(std::vector<Match>::iterator it = matchBox.begin(); it != matchBox.end(); ++it) {
+      if(it == matchBox.begin()) continue;
+      if(it->value < minValue) {
+        minPoint = it->point;
+        minValue = it->value;
+        minIt = it->it;
       }
     }
-
-    depthObject[i][j] = minIterator;
-    depthPoint[i][j] = minPoint;
-    depthValue[i][j] = minValue;
+  } else {
+    minPoint = vec3(0.0, 0.0, 0.0);
+    minValue = -1;
+    minIt = modelList.end();
   }
-  delete[] m;
+
+  depthPoint[i][j] = minPoint;
+  depthValue[i][j] = minValue;
+  depthObject[i][j] = minIt;
 }
