@@ -57,6 +57,7 @@ public:
 
 //  void intersectScene(vec3 eye, vec3 ray, vec3 *intersectPoint, float *value);
   bool intersectScene(vec3 eye, vec3 ray, int i, int j);
+  bool intersectScene(vec3 eye, vec3 ray, Match *result);
 };
 
 #endif /* gtScene_hpp */

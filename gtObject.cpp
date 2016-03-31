@@ -41,44 +41,6 @@ vec3 GTSphere::normal(vec3 surfPoint) {
  * stored in the "hit" variable
  **********************************************************************/
 float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit) {
-//  GTCalc::printVector(position);
-//  GTCalc::printVector(eye);
-//  vec3 a = this->position - eye;
-//  float a_square = glm::dot(a, a);
-//  std::cout<<a_square<<std::endl;
-//  vec3 normal_ray = glm::normalize(ray);
-//  GTCalc::printVector(normal_ray);
-//  float l = glm::dot(normal_ray, a);
-//  std::cout<<l<<std::endl;
-//  float l_square = l * l;
-//  float r_square = this->radius * this->radius;
-////  std::cout << a_square << " " << l << " " << r_square << "\n";
-//  if(a_square > r_square && l < 0.0) {
-//    *hit = vec3(0.0, 0.0, 0.0);
-//    *value = -1.0f;
-//    return false;
-//  }
-//
-//  float m_square = a_square - l_square;
-//  if(m_square > r_square) {
-//    *hit = vec3(0.0, 0.0, 0.0);
-//    *value = -1.0f;
-//    return false;
-//  }
-//
-//  float q_square = r_square - m_square;
-//  float q = sqrt(q_square);
-//  float t;
-//  if(a_square > r_square) t = l - q;
-//  else t = l + q;
-////  std::cout << "l:" << l << " q:" << q << " t:" << t << std::endl;
-//  vec3 offset = t * normal_ray + eye;
-////  GTCalc::printVector(offset);
-//  *hit = offset;
-////  GTCalc::printVector(offset);
-//  *value = glm::dot(offset, offset);
-////  std::cout << *value << std::endl;
-//  return true;
   vec3 e_pos = eye - this->position;
   float r_square = this->radius * this->radius;
 

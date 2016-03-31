@@ -17,6 +17,7 @@
 #include "include/glm/glm.hpp"
 #include "include/glm/gtc/matrix_transform.hpp"
 #include "include/glm/gtc/type_ptr.hpp"
+#include "include/glm/gtx/rotate_vector.hpp"
 
 #include "global.h"
 
@@ -25,38 +26,22 @@ using namespace glm;
 enum GTTracerSetting {
   NOUN = 0,
   USER_SCENE = 1,
-  SHADOW = 2
+  SHADOW = 2,
+  REFLECTION = 4
 };
 
 class GTTracer {
   bool userSceneActived;
   bool shadowActived;
+  bool reflectionActived;
   int maxStep;
 
-
-/*********************************************************************
- * Phong illumination - you need to implement this!
- *********************************************************************/
   GTScene *scene;
 
-  vec3 phong(vec3 q, vec3 v, vec3 surf_normal, GTObject *sph) {
-    vec3 color;
-    return color;
-  }
+  vec3 getReflectionVector(vec3 pointEye, vec3 pointSurf, std::list<GTSphere>::iterator object);
 
-
-/************************************************************************
- * This is the recursive ray tracer - you need to implement this!
- * You should decide what arguments to use.
- ************************************************************************/
-  vec3 recursive_ray_trace() {
-//
-// do your thing here
-//
-    vec3 color;
-    return color;
-  }
-
+  vec3 phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<GTSphere>::iterator obj);
+  vec3 recursive_ray_trace(vec3 ray, GTLight light);
 public:
   int win_width;
   int win_height;

@@ -11,6 +11,7 @@
 GTTracer::GTTracer() {
   userSceneActived = false;
   shadowActived = false;
+  reflectionActived = false;
 
   maxStep = 0;
   scene = new GTScene;
@@ -32,6 +33,9 @@ void GTTracer::setConfiguration(GTTracerSetting arg) {
 
   if (arg & 2) shadowActived = true;
   else shadowActived = false;
+
+  if (arg & 4) reflectionActived = true;
+  else reflectionActived = false;
 }
 
 void GTTracer::buildScene() {
@@ -39,7 +43,7 @@ void GTTracer::buildScene() {
   else scene->buildDefaultScene();
 }
 
-inline float max(float a, float b) { return a>b?a:b; }
+inline float max(float a, float b) { return a > b ? a : b; }
 
 /*********************************************************************
 * This function traverses all the pixels and cast rays. It calls the
@@ -53,15 +57,15 @@ void GTTracer::traceRay() {
   int i, j;
   float x_grid_size = image_width / float(win_width);
   float y_grid_size = image_height / float(win_height);
-  float x_start = -0.5 * image_width;
-  float y_start = -0.5 * image_height;
+  float x_start = -0.5f * image_width;
+  float y_start = -0.5f * image_height;
   vec3 ret_color;
   vec3 cur_pixel_pos;
   vec3 ray;
 
   // ray is cast through center of pixel
-  cur_pixel_pos.x = x_start + 0.5 * x_grid_size;
-  cur_pixel_pos.y = y_start + 0.5 * y_grid_size;
+  cur_pixel_pos.x = x_start + 0.5f * x_grid_size;
+  cur_pixel_pos.y = y_start + 0.5f * y_grid_size;
   cur_pixel_pos.z = scene->image_plane;
 
 
@@ -72,35 +76,14 @@ void GTTracer::traceRay() {
       scene->intersectScene(scene->eye_pos, ray, i, j);
 
       if (scene->depthValue[i][j] > GTCalc::precision) {
+        // setup light source
         std::list<GTLight>::iterator it = scene->lightList.begin();
         GTLight &light = *(it);
-        vec3 pointSurf = scene->depthPoint[i][j];
-        std::list<GTSphere>::iterator obj = scene->depthObject[i][j];
+//        vec3 pointSurf = scene->depthPoint[i][j];
+//        std::list<GTSphere>::iterator obj = scene->depthObject[i][j];
 
-        vec3 normLight = glm::normalize(light.position - pointSurf);
-        float distance = glm::length(light.position - pointSurf);
-        vec3 &decay = scene->decay;
-        float decayCoefficient = 1 / (decay.x + decay.y * distance + decay.z * distance * distance);
-
-        vec3 normSurf = glm::normalize(obj->normal(pointSurf));
-        vec3 vecReflect = (2 * glm::dot(normLight, normSurf) * normSurf) - normLight;
-        vec3 normReflect = glm::normalize(vecReflect);
-        vec3 vecProject = scene->eye_pos - pointSurf;
-        vec3 normProject = glm::normalize(vecProject);
-
-        // features
-        if(shadowActived) {
-          float shadowCoefficient = 1.0f;
-          if(scene->intersectScene(pointSurf, normLight, JMP, JMP)) shadowCoefficient = 0.0f;
-          decayCoefficient *= shadowCoefficient;
-        }
-
-        // calculate color
-        vec3 Ambient = obj->ambient * scene->global_ambient;
-        vec3 Diffuse = decayCoefficient * light.intensity  * obj->diffuse * max(glm::dot(normLight, normSurf), 0.0f);
-        vec3 Specular = decayCoefficient * light.intensity * obj->specular *
-            (float)pow(max(glm::dot(normReflect, normProject), 0.0f), obj->shineness);
-        ret_color = Ambient + Diffuse + Specular;
+//        ret_color = phong(pointSurf, light, obj);
+        ret_color = recursive_ray_trace(ray, light);
 
       } else {
         ret_color = scene->background_color;
@@ -137,6 +120,91 @@ void GTTracer::traceRay() {
     cur_pixel_pos.y += y_grid_size;
     cur_pixel_pos.x = x_start;
   }
+}
+
+/*********************************************************************
+ * Phong illumination
+ *********************************************************************/
+vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<GTSphere>::iterator obj) {
+  vec3 color;
+
+  vec3 normLight = glm::normalize(light.position - pointSurf);
+  float distance = glm::length(light.position - pointSurf);
+  vec3 &decay = scene->decay;
+  float decayCoefficient = 1 / (decay.x + decay.y * distance + decay.z * distance * distance);
+
+  vec3 normSurf = glm::normalize(obj->normal(pointSurf));
+  vec3 vecReflect = (2 * glm::dot(normLight, normSurf) * normSurf) - normLight;
+  vec3 normReflect = glm::normalize(vecReflect);
+  //vec3 vecProject = scene->eye_pos - pointSurf;
+  vec3 normProject = glm::normalize(vecProject);
+
+  // features
+  if (shadowActived) {
+    float shadowCoefficient = 1.0f;
+    if (scene->intersectScene(pointSurf, normLight, JMP, JMP)) shadowCoefficient = 0.0f;
+    decayCoefficient *= shadowCoefficient;
+  }
+
+  // calculate color
+  vec3 Ambient = obj->ambient * scene->global_ambient;
+  vec3 Diffuse = decayCoefficient * light.intensity * obj->diffuse * max(glm::dot(normLight, normSurf), 0.0f);
+  vec3 Specular = decayCoefficient * light.intensity * obj->specular *
+                  (float) pow(max(glm::dot(normReflect, normProject), 0.0f), obj->shineness);
+  color = Ambient + Diffuse + Specular;
+
+  return color;
+}
+
+vec3 GTTracer::getReflectionVector(vec3 vecView, vec3 pointSurf, std::list<GTSphere>::iterator object) {
+  vec3 normRay = glm::normalize(vecView);
+  vec3 normSurf = glm::normalize(object->normal(pointSurf));
+//  vec3 Reflect = (2 * glm::dot(normRay, normSurf) * normSurf) - normRay;
+  vec3 Reflect = (glm::rotate(normRay, glm::radians(180.0f), normSurf));
+  return glm::normalize(Reflect);
+}
+
+/************************************************************************
+ * This is the recursive ray tracer - you need to implement this!
+ * You should decide what arguments to use.
+ ************************************************************************/
+vec3 GTTracer::recursive_ray_trace(vec3 ray, GTLight light) {
+  int step = maxStep;
+  if(!reflectionActived) step = 0;
+
+  vec3 color = vec3(0.0, 0.0, 0.0);
+  Match matchBox;
+
+  vec3 curEye = scene->eye_pos, curRay = ray;
+  vec3 curView;
+  // Iphong
+  if (scene->intersectScene(curEye, curRay, &matchBox)) {
+    curView = curEye - matchBox.point;
+    color = phong(matchBox.point, curView, light, matchBox.it);
+  } else {
+    color = scene->background_color;
+    step = 0;
+  }
+
+  for (int i = 0; i < step; i++) {
+    curView = getReflectionVector(curView, matchBox.point, matchBox.it);
+    curEye = matchBox.point;
+    float reflectance = matchBox.it->reflectance;
+    if (scene->intersectScene(curEye, curView, &matchBox)) {
+      vec3 accumulator = phong(matchBox.point, curView, light, matchBox.it);
+      color += accumulator * matchBox.it->reflectance;
+//      if(i != 0) reflections += accumulator * matchBox.it->reflectance;
+//      else reflections += accumulator;
+//      curEye = matchBox.point;
+//      curRay = getReflectionVector(curRay, matchBox.point, matchBox.it);
+    } else {
+      color += scene->background_color * reflectance;
+      break;
+    }
+  }
+//  reflections *= obj->reflectance;
+
+  return color;
 }
 
 /*********************************************************
