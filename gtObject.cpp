@@ -81,13 +81,13 @@ float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit) {
   }
 }
 
-//vec3 GTCube::normal(vec3 surfPoint) {
-//  return GTModel::normal(surfPoint);
-//}
-//
-//float GTCube::intersect(vec3 eye, vec3 ray, vec3 *hit) {
-//  return GTModel::intersect(eye, ray, hit);
-//}
+vec3 GTCube::normal(vec3 surfPoint) {
+  return GTModel::normal(surfPoint);
+}
+
+float GTCube::intersect(vec3 eye, vec3 ray, vec3 *hit) {
+  return GTModel::intersect(eye, ray, hit);
+}
 
 
 

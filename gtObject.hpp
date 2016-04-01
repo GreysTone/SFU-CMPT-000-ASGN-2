@@ -54,11 +54,11 @@ public:
   float intersect(vec3 eye, vec3 ray, vec3 *hit);
 };
 
-//class GTCube : public GTModel {
-//public:
-//
-//  vec3 normal(vec3 surfPoint);
-//  float intersect(vec3 eye, vec3 ray, vec3 *hit);
-//};
+class GTCube : public GTModel {
+public:
+
+  vec3 normal(vec3 surfPoint);
+  float intersect(vec3 eye, vec3 ray, vec3 *hit);
+};
 
 #endif /* gtObject_hpp */

@@ -26,7 +26,7 @@ void GTScene::addLight(GTLight arg) {
   modelList.push_back(arg);
 }*/
 void GTScene::addModel(GTModel *arg) {
-  modelHeap.push_back(arg);
+  modelList.push_back(arg);
 }
 
 void GTScene::buildUserScene() { }
@@ -67,10 +67,6 @@ void GTScene::buildDefaultScene() {
   sphere[2].specular = vec3(0.0, 1.0, 0.0);
   sphere[2].shineness = 30;
   sphere[2].reflectance = 0.3;
-  // add sphere
-//  for (int i = 0; i < 3; i++) {
-//    addModel(sphere[i]);
-//  }
   for (int i = 0; i < 3; i++) {
     GTModel *model = &(sphere[i]);
     addModel(model);
@@ -83,38 +79,14 @@ void GTScene::buildDefaultScene() {
  * which arguments to use for the function. For example, note that you
  * should return the point of intersection to the calling function.
  **********************************************************************/
-/*bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTSphere>::iterator ignore) {
-  Match tmpMatch, minMatch;
-  minMatch.it = modelList.end();  // set exit boundary
-  bool setMatch = false;
-  for (std::list<GTSphere>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
-    if(it == ignore) continue;
-    tmpMatch.value = (*it).intersect(eye, ray, &(tmpMatch.point));
-    tmpMatch.it = it;
-    if(tmpMatch.value < GTCalc::precision) continue;
-    if(!setMatch || tmpMatch.value < minMatch.value) {
-      setMatch = true;
-      minMatch = tmpMatch;
-    }
-  }
-
-  *result = minMatch;
-
-  if(minMatch.it == modelList.end()) return false;
-  else return true;
-}*/
-
 bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTModel *>::iterator ignore) {
-//  std::cout << "intersctScene()\n";
   Match tmpMatch, minMatch;
-  minMatch.itor = modelHeap.end();  // set exit boundary
+  minMatch.itor = modelList.end();  // set exit boundary
   bool setMatch = false;
-  for (std::list<GTModel *>::iterator it = modelHeap.begin(); it != modelHeap.end(); ++it) {
-//    std::cout << "intersctScene() inLoop\n";
+  for (std::list<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
     if(it == ignore) continue;
     GTModel *object = (*it);
     tmpMatch.value = object->intersect(eye, ray, &(tmpMatch.point));
-//    std::cout << "intersctScene() intersect One object\n";
     tmpMatch.itor = it;
     if(tmpMatch.value < GTCalc::precision) continue;
     if(!setMatch || tmpMatch.value < minMatch.value) {
@@ -125,6 +97,6 @@ bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTMode
 
   *result = minMatch;
 
-  if(minMatch.itor == modelHeap.end()) return false;
+  if(minMatch.itor == modelList.end()) return false;
   else return true;
 }
