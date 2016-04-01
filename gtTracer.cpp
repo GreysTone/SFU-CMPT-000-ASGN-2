@@ -40,14 +40,14 @@ void GTTracer::setConfiguration(GTTracerSetting arg) {
 
   if (arg & 8) chessboardActive = true;
   else chessboardActive = false;
+
+  if (arg & 16) refractionActive = true;
+  else refractionActive = false;
 }
 
 void GTTracer::buildScene() {
   if (userSceneActive) scene->buildUserScene();
-  else {
-    if(chessboardActive)  scene->buildDefaultScene(true);
-    else scene->buildDefaultScene(false);
-  }
+  else scene->buildDefaultScene(chessboardActive, refractionActive);
 }
 
 inline float max(float a, float b) { return a > b ? a : b; }
@@ -123,7 +123,7 @@ void GTTracer::traceRay() {
 /*********************************************************************
  * Phong illumination
  *********************************************************************/
-vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<GTModel *>::iterator model, int step) {
+vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<GTModel *>::iterator model, vec3 ray, int step) {
   vec3 color;
 
   vec3 normLight = glm::normalize(light.position - pointSurf);
@@ -160,6 +160,16 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<G
     color += color_ref * object->reflectance;
   }
 
+  // refraction
+  if (refractionActive && step < maxStep && object->refract) {
+    vec3 outRay, outPoint;
+    if(object->refracted(ray, pointSurf, &outRay, &outPoint) > GTCalc::precision) {
+      vec3 color_ref = recursive_ray_trace(outPoint, outRay, light, step + 1);
+      color += color_ref * object->refractance;
+    }
+//    else color = vec3(0.0, 0.0, 0.0);
+  }
+
   return color;
 }
 
@@ -177,7 +187,7 @@ vec3 GTTracer::recursive_ray_trace(vec3 eye, vec3 ray, GTLight light, int step) 
 
   vec3 vecView = (eye - matchBox.point);
   vecView = glm::normalize(vecView);
-  return phong(matchBox.point, vecView, light, matchBox.itor, step);
+  return phong(matchBox.point, vecView, light, matchBox.itor, ray, step);
 }
 
 /*********************************************************

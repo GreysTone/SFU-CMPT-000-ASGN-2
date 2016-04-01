@@ -30,7 +30,7 @@ vec3 GTModel::getNormal(vec3 surfPoint) {
   return empty;
 }
 
-float GTModel::intersect(vec3 eye, vec3 ray, vec3 *hit) {
+float GTModel::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   return 0;
 }
 
@@ -44,6 +44,14 @@ vec3 GTModel::getDiffuse(vec3 point) {
 
 vec3 GTModel::getSpecular(vec3 point) {
   return specular;
+}
+
+bool GTModel::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
+  return false;
+}
+
+float GTModel::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
+  return 0;
 }
 
 
@@ -61,7 +69,7 @@ vec3 GTSphere::getNormal(vec3 surfPoint) {
  * If there is an intersection, the point of intersection should be
  * stored in the "hit" variable
  **********************************************************************/
-float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit) {
+float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   vec3 e_pos = eye - this->position;
   float r_square = this->radius * this->radius;
 
@@ -88,8 +96,13 @@ float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit) {
       *hit = eye + t1 * ray;
       return t1;
     } else {
-      *hit = eye + t2 * ray;
-      return t2;
+      if(far) {
+        *hit = eye + t1 * ray;
+        return t1;
+      } else {
+        *hit = eye + t2 * ray;
+        return t2;
+      }
     }
   }
 }
@@ -106,6 +119,51 @@ vec3 GTSphere::getSpecular(vec3 point) {
   return GTModel::getSpecular(point);
 }
 
+bool GTSphere::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
+  vec3 normal = getNormal(inPoint);
+  vec3 in = glm::normalize(-inRay);
+  vec3 out;
+
+  float refraction_index;
+  if (glm::dot(in, normal) > GTCalc::precision) {
+    refraction_index = 1 / refractivity;
+  } else {
+    normal = -normal;
+    refraction_index = refractivity;
+  }
+
+  float m = glm::dot(in, normal);
+  float a_square = 1 - pow(m, 2);
+  float b_square = a_square * pow(refraction_index, 2);
+  float n_square = 1 - b_square;
+
+  if (n_square < GTCalc::precision) return false;
+  float n = sqrt(n_square);
+
+  out = normal * (m * refraction_index - n) - refraction_index * in;
+  *outRay = out;
+  return true;
+//  float root = 1 - pow(refraction_index,2) * ( 1 - pow( glm::dot(normal,in), 2) );
+//
+//  if( root < GTCalc::precision ) return false;
+//
+//  *outRay = normal * ( refraction_index * glm::dot(normal,in) - sqrt(root) ) - refraction_index * in;
+//  return true;
+}
+
+float GTSphere::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
+  vec3 mid, out;
+  vec3 endPoint;
+
+  if(!refractRay(inRay, inPoint, &mid)) return -1.0f;
+  float inLength = intersect(inPoint, mid, &endPoint, true);
+  if(inLength < GTCalc::precision) return -1.0f;
+
+  if(!refractRay(mid, endPoint, &out)) return -1.0f;
+  *outRay = out;
+  *outPoint = endPoint;
+  return 1.0f;
+}
 
 vec3 GTPlane::getNormal(vec3 surfPoint) {
   return glm::normalize(normal);
@@ -116,7 +174,7 @@ vec3 GTPlane::getNormal(vec3 surfPoint) {
  * Plane: X * N = P * N     : Normal, Point
  * t(R) * N = (P - E) * N
  */
-float GTPlane::intersect(vec3 eye, vec3 ray, vec3 *hit) {
+float GTPlane::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   float Right = glm::dot((position - eye), normal);
   float Left = glm::dot(ray, normal);
   if (Left > -GTCalc::precision && Left < GTCalc::precision) return -1.0f;
@@ -158,3 +216,15 @@ vec3 GTPlane::getSpecular(vec3 point) {
   if ((x + z) % 2 == 0) return glm::vec3(1.0, 1.0, 1.0);
   else return glm::vec3(0.3, 0.3, 0.3);
 }
+
+bool GTPlane::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
+  return GTModel::refractRay(inRay, inPoint, outRay);
+}
+
+float GTPlane::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
+  return GTModel::refracted(inRay, inPoint, outRay, outPoint);
+}
+
+
+
+

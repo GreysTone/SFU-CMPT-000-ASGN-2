@@ -28,7 +28,8 @@ enum GTTracerSetting {
   USER_SCENE = 1,
   SHADOW = 2,
   REFLECTION = 4,
-  CHESSBOARD = 8
+  CHESSBOARD = 8,
+  REFRACTION = 16
 };
 
 class GTTracer {
@@ -36,11 +37,12 @@ class GTTracer {
   bool shadowActive;
   bool reflectionActive;
   bool chessboardActive;
+  bool refractionActive;
   int maxStep;
 
   GTScene *scene;
 
-  vec3 phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<GTModel *>::iterator model, int step);
+  vec3 phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<GTModel *>::iterator model, vec3 ray, int step);
   vec3 recursive_ray_trace(vec3 eye, vec3 ray, GTLight light, int step);
 public:
   int win_width;

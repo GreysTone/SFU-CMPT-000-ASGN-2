@@ -42,11 +42,17 @@ public:
   float shineness;
   float reflectance;
 
-  virtual float intersect(vec3 eye, vec3 ray, vec3 *hit);
+  bool refract;
+  float refractivity;
+  float refractance;
+
   virtual vec3 getNormal(vec3 surfPoint);
   virtual vec3 getAmbient(vec3 point);
   virtual vec3 getDiffuse(vec3 point);
   virtual vec3 getSpecular(vec3 point);
+  virtual float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
+  virtual float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
+  virtual bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
 };
 
 class GTSphere : public GTModel {
@@ -57,7 +63,9 @@ public:
   vec3 getAmbient(vec3 point);
   vec3 getDiffuse(vec3 point);
   vec3 getSpecular(vec3 point);
-  float intersect(vec3 eye, vec3 ray, vec3 *hit);
+  float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
+  float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
+  bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
 };
 
 class GTPlane : public GTModel {
@@ -72,7 +80,9 @@ public:
   vec3 getAmbient(vec3 point);
   vec3 getDiffuse(vec3 point);
   vec3 getSpecular(vec3 point);
-  float intersect(vec3 eye, vec3 ray, vec3 *hit);
+  float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
+  float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
+  bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
 };
 
 #endif /* gtObject_hpp */

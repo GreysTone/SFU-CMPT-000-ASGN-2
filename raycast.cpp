@@ -245,20 +245,19 @@ int main(int argc, char **argv) {
 
   // user defined scene
   if (strcmp(argv[1], "-u") == 0) options |= USER_SCENE;
-//    set_up_user_scene();
-//  else
-//    set_up_default_scene();
-//  set_up_default_scene();
 
   // maximum level of recursions
   tracer->setMaxStep(atoi(argv[2]));
 
-  // Optional arguments
+  // optional arguments
   for (int i = 3; i < argc; i++) {
     if (strcmp(argv[i], "+s") == 0) options |= SHADOW;
     if (strcmp(argv[i], "+l") == 0) options |= REFLECTION;
     if (strcmp(argv[i], "+c") == 0) options |= CHESSBOARD;
+    if (strcmp(argv[i], "+r") == 0) options |= REFRACTION;
   }
+
+//  std::cout << options << std::endl;
 
   tracer->setConfiguration((GTTracerSetting)options);
   tracer->buildScene();
