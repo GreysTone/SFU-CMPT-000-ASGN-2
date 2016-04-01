@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <GL/glut.h>
 #include <string.h>
+#include <random>
 #include "gtScene.hpp"
 #include "include/glm/glm.hpp"
 #include "include/glm/gtc/matrix_transform.hpp"
@@ -29,7 +30,8 @@ enum GTTracerSetting {
   SHADOW = 2,
   REFLECTION = 4,
   CHESSBOARD = 8,
-  REFRACTION = 16
+  REFRACTION = 16,
+  STOCHASTIC_DIFFUSE = 32
 };
 
 class GTTracer {
@@ -38,6 +40,7 @@ class GTTracer {
   bool reflectionActive;
   bool chessboardActive;
   bool refractionActive;
+  bool stochasticActive;
   int maxStep;
 
   GTScene *scene;

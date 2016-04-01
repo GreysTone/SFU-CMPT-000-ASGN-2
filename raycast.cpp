@@ -255,6 +255,7 @@ int main(int argc, char **argv) {
     if (strcmp(argv[i], "+l") == 0) options |= REFLECTION;
     if (strcmp(argv[i], "+c") == 0) options |= CHESSBOARD;
     if (strcmp(argv[i], "+r") == 0) options |= REFRACTION;
+    if (strcmp(argv[i], "+f") == 0) options |= STOCHASTIC_DIFFUSE;
   }
 
 //  std::cout << options << std::endl;

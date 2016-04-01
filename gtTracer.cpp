@@ -43,6 +43,9 @@ void GTTracer::setConfiguration(GTTracerSetting arg) {
 
   if (arg & 16) refractionActive = true;
   else refractionActive = false;
+
+  if (arg & 32) stochasticActive = true;
+  else stochasticActive = false;
 }
 
 void GTTracer::buildScene() {
@@ -158,6 +161,26 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<G
     vec3 reflection = glm::normalize((2 * glm::dot(normProject, normSurf) * normSurf) - normProject);
     vec3 color_ref = recursive_ray_trace(pointSurf, reflection, light, step + 1);
     color += color_ref * object->reflectance;
+  }
+
+  // stochastic diffuse
+  if (stochasticActive && step < 2) {
+    for (int i = 0; i < STOCHASTIC_RAY_COUNT; i++) {
+      vec3 axisA = normSurf;
+      vec3 axisB = glm::normalize(glm::cross(normSurf, vecProject));
+
+      // normal distribution
+      std::default_random_engine engine;
+      std::normal_distribution<float> distribute(0.0f, 0.001f);
+
+      vec3 reflection = glm::normalize((2 * glm::dot(normProject, normSurf) * normSurf) - normProject);
+      reflection = glm::rotate(reflection, distribute(engine), axisA);
+      reflection = glm::rotate(reflection, distribute(engine), axisB);
+      reflection = glm::normalize(reflection);
+
+      vec3 color_ref = recursive_ray_trace(pointSurf, reflection, light, step + 1);
+      color += color_ref * (float)(0.5 / STOCHASTIC_RAY_COUNT);
+    }
   }
 
   // refraction
