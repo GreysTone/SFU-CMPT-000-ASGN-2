@@ -25,6 +25,14 @@ inline float dot(vec3 v1, vec3 v2) {
 
 }
 
+vec3 GTModel::normal(vec3 surfPoint) {
+  vec3 empty = vec3(0.0, 0.0, 0.0);
+  return empty;
+}
+
+float GTModel::intersect(vec3 eye, vec3 ray, vec3 *hit) {
+  return 0;
+}
 
 vec3 GTSphere::normal(vec3 surfPoint) {
   return glm::normalize(surfPoint - this->position);
@@ -72,6 +80,14 @@ float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit) {
     }
   }
 }
+
+//vec3 GTCube::normal(vec3 surfPoint) {
+//  return GTModel::normal(surfPoint);
+//}
+//
+//float GTCube::intersect(vec3 eye, vec3 ray, vec3 *hit) {
+//  return GTModel::intersect(eye, ray, hit);
+//}
 
 
 

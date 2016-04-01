@@ -22,8 +22,11 @@ void GTScene::addLight(GTLight arg) {
   lightList.push_back(arg);
 }
 
-void GTScene::addModel(GTSphere arg) {
+/*void GTScene::addModel(GTSphere arg) {
   modelList.push_back(arg);
+}*/
+void GTScene::addModel(GTModel *arg) {
+  modelHeap.push_back(arg);
 }
 
 void GTScene::buildUserScene() { }
@@ -39,7 +42,7 @@ void GTScene::buildDefaultScene() {
   // add light
   addLight(light1);
 
-  GTSphere sphere[3];
+  GTSphere *sphere = new GTSphere[3];
   // sphere 1
   sphere[0].position = vec3(1.5, -0.2, -3.2);
   sphere[0].radius = 1.23;
@@ -65,8 +68,12 @@ void GTScene::buildDefaultScene() {
   sphere[2].shineness = 30;
   sphere[2].reflectance = 0.3;
   // add sphere
+//  for (int i = 0; i < 3; i++) {
+//    addModel(sphere[i]);
+//  }
   for (int i = 0; i < 3; i++) {
-    addModel(sphere[i]);
+    GTModel *model = &(sphere[i]);
+    addModel(model);
   }
 }
 
@@ -76,56 +83,7 @@ void GTScene::buildDefaultScene() {
  * which arguments to use for the function. For example, note that you
  * should return the point of intersection to the calling function.
  **********************************************************************/
-bool GTScene::intersectScene(vec3 eye, vec3 ray, int i, int j) {
-//  std::cout << "eye:";
-//  GTCalc::printVector(eye);
-//  std::cout << "ray:";
-//  GTCalc::printVector(ray);
-
-
-  std::vector<Match> matchBox;
-  for (std::list<GTSphere>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
-    Match matcher;
-    matcher.value = (*it).intersect(eye, ray, &(matcher.point));
-    matcher.it = it;
-//    GTCalc::printVector(matcher.point);
-//    std::cout << "\t" << matcher.value << "\n";
-    if(matcher.value >= GTCalc::precision /*&& /*matcher.value <= OVER_RANGE && */
-        /*finite(matcher.value) && !isnan(matcher.value)*/)   matchBox.push_back(matcher);
-  }
-//  std::cout << "\n";
-
-  vec3 minPoint;
-  float minValue;
-  std::list<GTSphere>::iterator minIt;
-  if(!matchBox.empty()) {
-    minPoint = matchBox.begin()->point;
-    minValue = matchBox.begin()->value;
-    minIt = matchBox.begin()->it;
-    for(std::vector<Match>::iterator it = matchBox.begin(); it != matchBox.end(); ++it) {
-      if(it == matchBox.begin()) continue;
-      if(it->value < minValue) {
-        minPoint = it->point;
-        minValue = it->value;
-        minIt = it->it;
-      }
-    }
-  } else {
-    minPoint = vec3(0.0, 0.0, 0.0);
-    minValue = -1;
-    minIt = modelList.end();
-  }
-
-  if(i != JMP || j != JMP) {
-    depthPoint[i][j] = minPoint;
-    depthValue[i][j] = minValue;
-    depthObject[i][j] = minIt;
-  }
-  if(minIt == modelList.end()) return false;
-  else return true;
-}
-
-bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTSphere>::iterator ignore) {
+/*bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTSphere>::iterator ignore) {
   Match tmpMatch, minMatch;
   minMatch.it = modelList.end();  // set exit boundary
   bool setMatch = false;
@@ -143,5 +101,30 @@ bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTSphe
   *result = minMatch;
 
   if(minMatch.it == modelList.end()) return false;
+  else return true;
+}*/
+
+bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTModel *>::iterator ignore) {
+//  std::cout << "intersctScene()\n";
+  Match tmpMatch, minMatch;
+  minMatch.itor = modelHeap.end();  // set exit boundary
+  bool setMatch = false;
+  for (std::list<GTModel *>::iterator it = modelHeap.begin(); it != modelHeap.end(); ++it) {
+//    std::cout << "intersctScene() inLoop\n";
+    if(it == ignore) continue;
+    GTModel *object = (*it);
+    tmpMatch.value = object->intersect(eye, ray, &(tmpMatch.point));
+//    std::cout << "intersctScene() intersect One object\n";
+    tmpMatch.itor = it;
+    if(tmpMatch.value < GTCalc::precision) continue;
+    if(!setMatch || tmpMatch.value < minMatch.value) {
+      setMatch = true;
+      minMatch = tmpMatch;
+    }
+  }
+
+  *result = minMatch;
+
+  if(minMatch.itor == modelHeap.end()) return false;
   else return true;
 }

@@ -41,6 +41,9 @@ public:
   vec3 specular;
   float shineness;
   float reflectance;
+
+  virtual float intersect(vec3 eye, vec3 ray, vec3 *hit);
+  virtual vec3 normal(vec3 surfPoint);
 };
 
 class GTSphere : public GTModel {
@@ -50,5 +53,12 @@ public:
   vec3 normal(vec3 surfPoint);
   float intersect(vec3 eye, vec3 ray, vec3 *hit);
 };
+
+//class GTCube : public GTModel {
+//public:
+//
+//  vec3 normal(vec3 surfPoint);
+//  float intersect(vec3 eye, vec3 ray, vec3 *hit);
+//};
 
 #endif /* gtObject_hpp */

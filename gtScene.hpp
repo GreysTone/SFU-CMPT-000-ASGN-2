@@ -19,12 +19,11 @@
 
 using namespace glm;
 
-#define OVER_RANGE (1E+10)
-
 typedef struct match {
   vec3 point;
   float value;
-  std::list<GTSphere>::iterator it;
+//  std::list<GTSphere>::iterator it;
+  std::list<GTModel *>::iterator itor;
 } Match;
 
 class GTScene {
@@ -40,9 +39,10 @@ public:
 
   std::list<GTLight> lightList;
   std::list<GTSphere> modelList;
-  std::list<GTSphere>::iterator depthObject[WIN_HEIGHT][WIN_WIDTH];
-  vec3 depthPoint[WIN_HEIGHT][WIN_WIDTH];
-  float depthValue[WIN_HEIGHT][WIN_WIDTH];
+  std::list<GTModel *> modelHeap;
+//  std::list<GTSphere>::iterator depthObject[WIN_HEIGHT][WIN_WIDTH];
+//  vec3 depthPoint[WIN_HEIGHT][WIN_WIDTH];
+//  float depthValue[WIN_HEIGHT][WIN_WIDTH];
 
   GTScene();
 
@@ -50,14 +50,16 @@ public:
 
   void addLight(GTLight arg);
 
-  void addModel(GTSphere arg);
+//  void addModel(GTSphere arg);
+  void addModel(GTModel *arg);
 
   void buildUserScene();
   void buildDefaultScene();
 
 //  void intersectScene(vec3 eye, vec3 ray, vec3 *intersectPoint, float *value);
-  bool intersectScene(vec3 eye, vec3 ray, int i, int j);
-  bool intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTSphere>::iterator ignore);
+//  bool intersectScene(vec3 eye, vec3 ray, int i, int j);
+//  bool intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTSphere>::iterator ignore);
+  bool intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTModel *>::iterator ignore);
 };
 
 #endif /* gtScene_hpp */

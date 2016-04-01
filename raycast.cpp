@@ -257,6 +257,7 @@ int main(int argc, char **argv) {
   for (int i = 3; i < argc; i++) {
     if (strcmp(argv[i], "+s") == 0) options |= SHADOW;
     if (strcmp(argv[i], "+l") == 0) options |= REFLECTION;
+    if (strcmp(argv[i], "+c") == 0) options |= CHESSBOARD;
   }
 
   tracer->setConfiguration((GTTracerSetting)options);
@@ -268,8 +269,7 @@ int main(int argc, char **argv) {
   // we have used so many global variables and this function is
   // happy to carry no parameters
   //
-  printf("Rendering scene using my fantastic ray tracer ...\n");
-//  ray_trace();
+
   tracer->traceRay();
 
   // we want to make sure that intensity values are normalized
