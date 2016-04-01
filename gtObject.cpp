@@ -25,7 +25,7 @@ inline float dot(vec3 v1, vec3 v2) {
 
 }
 
-vec3 GTModel::normal(vec3 surfPoint) {
+vec3 GTModel::getNormal(vec3 surfPoint) {
   vec3 empty = vec3(0.0, 0.0, 0.0);
   return empty;
 }
@@ -34,7 +34,20 @@ float GTModel::intersect(vec3 eye, vec3 ray, vec3 *hit) {
   return 0;
 }
 
-vec3 GTSphere::normal(vec3 surfPoint) {
+vec3 GTModel::getAmbient(vec3 point) {
+  return ambient;
+}
+
+vec3 GTModel::getDiffuse(vec3 point) {
+  return diffuse;
+}
+
+vec3 GTModel::getSpecular(vec3 point) {
+  return specular;
+}
+
+
+vec3 GTSphere::getNormal(vec3 surfPoint) {
   return glm::normalize(surfPoint - this->position);
 }
 
@@ -81,13 +94,67 @@ float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit) {
   }
 }
 
-vec3 GTCube::normal(vec3 surfPoint) {
-  return GTModel::normal(surfPoint);
+vec3 GTSphere::getAmbient(vec3 point) {
+  return GTModel::getAmbient(point);
 }
 
-float GTCube::intersect(vec3 eye, vec3 ray, vec3 *hit) {
-  return GTModel::intersect(eye, ray, hit);
+vec3 GTSphere::getDiffuse(vec3 point) {
+  return GTModel::getDiffuse(point);
+}
+
+vec3 GTSphere::getSpecular(vec3 point) {
+  return GTModel::getSpecular(point);
 }
 
 
+vec3 GTPlane::getNormal(vec3 surfPoint) {
+  return glm::normalize(normal);
+}
 
+/*
+ * Ray: X = E + t(R)        : Eye, Ray
+ * Plane: X * N = P * N     : Normal, Point
+ * t(R) * N = (P - E) * N
+ */
+float GTPlane::intersect(vec3 eye, vec3 ray, vec3 *hit) {
+  float Right = glm::dot((position - eye), normal);
+  float Left = glm::dot(ray, normal);
+  if (Left > -GTCalc::precision && Left < GTCalc::precision) return -1.0f;
+
+  float t = Right / Left;
+  if (t < GTCalc::precision) return -1.0f;
+
+  vec3 point = eye + t * ray;
+  vec3 cast = point - position;
+
+  if (fabsf(glm::dot(cast, xAxis)) > xLength / 2) return -1.0f;
+  if (fabsf(glm::dot(cast, zAxis)) > zLength / 2) return -1.0f;
+
+  *hit = point;
+  return t;
+}
+
+vec3 GTPlane::getAmbient(vec3 point) {
+  vec3 range = point - position;
+  int x = (int) floor(glm::dot(range, xAxis));
+  int z = (int) floor(glm::dot(range, zAxis));
+  if ((x + z) % 2 == 0) return vec3(1.0, 1.0, 1.0);
+  else return vec3(0.3, 0.3, 0.3);
+}
+
+vec3 GTPlane::getDiffuse(vec3 point) {
+  vec3 range = point - position;
+  int x = (int) floor(glm::dot(range, xAxis));
+  int z = (int) floor(glm::dot(range, zAxis));
+  if ((x + z) % 2 == 0) return glm::vec3(1.0, 1.0, 1.0);
+  else return glm::vec3(0.0, 0.0, 0.0);
+}
+
+vec3 GTPlane::getSpecular(vec3 point) {
+//  return GTModel::getSpecular(point);
+  vec3 range = point - position;
+  int x = (int) floor(glm::dot(range, xAxis));
+  int z = (int) floor(glm::dot(range, zAxis));
+  if ((x + z) % 2 == 0) return glm::vec3(1.0, 1.0, 1.0);
+  else return glm::vec3(0.3, 0.3, 0.3);
+}

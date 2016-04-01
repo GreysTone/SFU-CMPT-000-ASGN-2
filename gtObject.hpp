@@ -43,21 +43,35 @@ public:
   float reflectance;
 
   virtual float intersect(vec3 eye, vec3 ray, vec3 *hit);
-  virtual vec3 normal(vec3 surfPoint);
+  virtual vec3 getNormal(vec3 surfPoint);
+  virtual vec3 getAmbient(vec3 point);
+  virtual vec3 getDiffuse(vec3 point);
+  virtual vec3 getSpecular(vec3 point);
 };
 
 class GTSphere : public GTModel {
 public:
   float radius;
 
-  vec3 normal(vec3 surfPoint);
+  vec3 getNormal(vec3 surfPoint);
+  vec3 getAmbient(vec3 point);
+  vec3 getDiffuse(vec3 point);
+  vec3 getSpecular(vec3 point);
   float intersect(vec3 eye, vec3 ray, vec3 *hit);
 };
 
-class GTCube : public GTModel {
+class GTPlane : public GTModel {
 public:
+  vec3 normal;
+  vec3 xAxis;
+  vec3 zAxis;
+  int xLength;
+  int zLength;
 
-  vec3 normal(vec3 surfPoint);
+  vec3 getNormal(vec3 surfPoint);
+  vec3 getAmbient(vec3 point);
+  vec3 getDiffuse(vec3 point);
+  vec3 getSpecular(vec3 point);
   float intersect(vec3 eye, vec3 ray, vec3 *hit);
 };
 

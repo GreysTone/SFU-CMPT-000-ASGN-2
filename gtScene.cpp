@@ -16,6 +16,9 @@ GTScene::GTScene() {
 
 GTScene::~GTScene() {
   //TODO: release vector
+  for(std::list<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
+    delete (*it);
+  }
 }
 
 void GTScene::addLight(GTLight arg) {
@@ -31,7 +34,7 @@ void GTScene::addModel(GTModel *arg) {
 
 void GTScene::buildUserScene() { }
 
-void GTScene::buildDefaultScene() {
+void GTScene::buildDefaultScene(bool chessboard) {
   background_color = vec3(0.5, 0.05, 0.8);
   global_ambient = vec3(0.2, 0.2, 0.2);
   decay = vec3(0.5, 0.3, 0.0);
@@ -69,6 +72,24 @@ void GTScene::buildDefaultScene() {
   sphere[2].reflectance = 0.3;
   for (int i = 0; i < 3; i++) {
     GTModel *model = &(sphere[i]);
+    addModel(model);
+  }
+
+  //chessboard
+  if(chessboard) {
+    GTPlane *board = new GTPlane;
+    board->position = vec3(0.0, -2.5, -3.5);
+    board->normal = vec3(0,1,0);
+    board->xAxis = vec3(1,0,0);
+    board->zAxis = vec3(0,0,1);
+    board->xLength = 8;
+    board->zLength = 8;
+    board->ambient = vec3(0.1, 0.1, 0.1);
+    board->diffuse = vec3(0,0,0);
+    board->specular = vec3(1.0, 1.0, 1.0);
+    board->shineness = 20;
+    board->reflectance = 1.0;
+    GTModel *model = board;
     addModel(model);
   }
 }

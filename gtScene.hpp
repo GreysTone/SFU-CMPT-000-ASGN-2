@@ -47,7 +47,7 @@ public:
   void addModel(GTModel *arg);
 
   void buildUserScene();
-  void buildDefaultScene();
+  void buildDefaultScene(bool chessboard);
 
   bool intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTModel *>::iterator ignore);
 };

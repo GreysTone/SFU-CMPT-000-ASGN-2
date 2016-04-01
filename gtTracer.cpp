@@ -44,7 +44,10 @@ void GTTracer::setConfiguration(GTTracerSetting arg) {
 
 void GTTracer::buildScene() {
   if (userSceneActive) scene->buildUserScene();
-  else scene->buildDefaultScene();
+  else {
+    if(chessboardActive)  scene->buildDefaultScene(true);
+    else scene->buildDefaultScene(false);
+  }
 }
 
 inline float max(float a, float b) { return a > b ? a : b; }
@@ -130,7 +133,7 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<G
 
   GTModel *object = (*model);
 
-  vec3 normSurf = glm::normalize(object->normal(pointSurf));
+  vec3 normSurf = glm::normalize(object->getNormal(pointSurf));
   vec3 vecReflect = (2 * glm::dot(normLight, normSurf) * normSurf) - normLight;
   vec3 normReflect = glm::normalize(vecReflect);
   vec3 normProject = glm::normalize(vecProject);
@@ -144,9 +147,9 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<G
   }
 
   // calculate color
-  vec3 Ambient = object->ambient * scene->global_ambient;
-  vec3 Diffuse = decayCoefficient * light.intensity * object->diffuse * max(glm::dot(normLight, normSurf), 0.0f);
-  vec3 Specular = decayCoefficient * light.intensity * object->specular *
+  vec3 Ambient = object->getAmbient(pointSurf) * scene->global_ambient;
+  vec3 Diffuse = decayCoefficient * light.intensity * object->getDiffuse(pointSurf) * max(glm::dot(normLight, normSurf), 0.0f);
+  vec3 Specular = decayCoefficient * light.intensity * object->getSpecular(pointSurf) *
                   (float) pow(max(glm::dot(normReflect, normProject), 0.0f), object->shineness);
   color = Ambient + Diffuse + Specular;
 
