@@ -56,7 +56,6 @@ float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit) {
       return -1.0f;
     } else {
       *hit = eye + t * ray;
-//      return GTCalc::dot(*hit, *hit);
       return t;
     }
   } else { // two root
@@ -66,11 +65,9 @@ float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit) {
       return -1.0f;
     } else if (t2 < -GTCalc::precision) {
       *hit = eye + t1 * ray;
-//      return GTCalc::dot(*hit, *hit);
       return t1;
     } else {
       *hit = eye + t2 * ray;
-//      return GTCalc::dot(*hit, *hit);
       return t2;
     }
   }

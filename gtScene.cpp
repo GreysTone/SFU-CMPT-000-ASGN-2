@@ -126,16 +126,13 @@ bool GTScene::intersectScene(vec3 eye, vec3 ray, int i, int j) {
 }
 
 bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTSphere>::iterator ignore) {
-
-  std::vector<Match> matchBox;
   Match tmpMatch, minMatch;
-  minMatch.it = modelList.end();
+  minMatch.it = modelList.end();  // set exit boundary
   bool setMatch = false;
   for (std::list<GTSphere>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
     if(it == ignore) continue;
     tmpMatch.value = (*it).intersect(eye, ray, &(tmpMatch.point));
     tmpMatch.it = it;
-    //if(matcher.value >= GTCalc::precision)   matchBox.push_back(matcher);
     if(tmpMatch.value < GTCalc::precision) continue;
     if(!setMatch || tmpMatch.value < minMatch.value) {
       setMatch = true;
@@ -144,30 +141,6 @@ bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTSphe
   }
 
   *result = minMatch;
-//  vec3 minPoint;
-//  float minValue;
-//  std::list<GTSphere>::iterator minIt;
-//  if(!matchBox.empty()) {
-//    minPoint = matchBox.begin()->point;
-//    minValue = matchBox.begin()->value;
-//    minIt = matchBox.begin()->it;
-//    for(std::vector<Match>::iterator it = matchBox.begin(); it != matchBox.end(); ++it) {
-//      if(it == matchBox.begin()) continue;
-//      if(it->value < minValue) {
-//        minPoint = it->point;
-//        minValue = it->value;
-//        minIt = it->it;
-//      }
-//    }
-//  } else {
-//    minPoint = vec3(0.0, 0.0, 0.0);
-//    minValue = -1;
-//    minIt = modelList.end();
-//  }
-//
-//  result->value = minValue;
-//  result->point = minPoint;
-//  result->it = minIt;
 
   if(minMatch.it == modelList.end()) return false;
   else return true;

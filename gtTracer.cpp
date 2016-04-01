@@ -136,7 +136,6 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<G
   vec3 normSurf = glm::normalize(obj->normal(pointSurf));
   vec3 vecReflect = (2 * glm::dot(normLight, normSurf) * normSurf) - normLight;
   vec3 normReflect = glm::normalize(vecReflect);
-  //vec3 vecProject = scene->eye_pos - pointSurf;
   vec3 normProject = glm::normalize(vecProject);
 
   // shadow
@@ -156,7 +155,6 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<G
 
   // reflectance
   if (reflectionActived && step < maxStep) {
-//    vec3 reflection = glm::normalize(glm::rotate(normProject, glm::radians(180.0f), normSurf));
     vec3 reflection =  glm::normalize((2 * glm::dot(normProject, normSurf) * normSurf) - normProject);
     vec3 color_ref = recursive_ray_trace(pointSurf, reflection, light, step+1);
     color += color_ref * obj->reflectance;
@@ -178,14 +176,8 @@ vec3 GTTracer::getReflectionVector(vec3 vecView, vec3 pointSurf, std::list<GTSph
  * You should decide what arguments to use.
  ************************************************************************/
 vec3 GTTracer::recursive_ray_trace(vec3 eye, vec3 ray, GTLight light, int step) {
-//  int step = maxStep;
-//  if(!reflectionActived) step = 0;
 
-//  vec3 color = vec3(0.0, 0.0, 0.0);
   Match matchBox;
-
-  //return scene->background_color;
-
   if(!(scene->intersectScene(eye, ray, &matchBox, scene->modelList.end()))) {
     return scene->background_color;
   }
@@ -193,37 +185,6 @@ vec3 GTTracer::recursive_ray_trace(vec3 eye, vec3 ray, GTLight light, int step) 
   vec3 vecView = (eye - matchBox.point);
   vecView = glm::normalize(vecView);
   return phong(matchBox.point, vecView, light, matchBox.it, step);
-//
-//  vec3 curEye = scene->eye_pos, curRay = ray;
-//  vec3 curView;
-//  // Iphong
-//  if (scene->intersectScene(curEye, curRay, &matchBox, scene->modelList.end())) {
-//    curView = curEye - matchBox.point;
-//    color = phong(matchBox.point, curView, light, matchBox.it);
-//  } else {
-//    color = scene->background_color;
-//    step = 0;
-//  }
-//
-//  for (int i = 0; i < step; i++) {
-//    curView = getReflectionVector(curView, matchBox.point, matchBox.it);
-//    curEye = matchBox.point;
-//    float reflectance = matchBox.it->reflectance;
-//    if (scene->intersectScene(curEye, curView, &matchBox, matchBox.it)) {
-//      vec3 accumulator = phong(matchBox.point, curView, light, matchBox.it);
-//      color += accumulator * matchBox.it->reflectance;
-//      if(i != 0) reflections += accumulator * matchBox.it->reflectance;
-//      else reflections += accumulator;
-//      curEye = matchBox.point;
-//      curRay = getReflectionVector(curRay, matchBox.point, matchBox.it);
-//    } else {
-//      color += scene->background_color * reflectance;
-//      break;
-//    }
-//  }
-//  reflections *= obj->reflectance;
-
-//  return color;
 }
 
 /*********************************************************
