@@ -57,7 +57,7 @@ public:
 
 //  void intersectScene(vec3 eye, vec3 ray, vec3 *intersectPoint, float *value);
   bool intersectScene(vec3 eye, vec3 ray, int i, int j);
-  bool intersectScene(vec3 eye, vec3 ray, Match *result);
+  bool intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTSphere>::iterator ignore);
 };
 
 #endif /* gtScene_hpp */
