@@ -46,7 +46,7 @@ public:
   void addLight(GTLight arg);
   void addModel(GTModel *arg);
 
-  void buildUserScene();
+  void buildUserScene(bool chessboard, bool refract);
   void buildDefaultScene(bool chessboard, bool refract);
 
   bool intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTModel *>::iterator ignore);

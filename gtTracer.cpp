@@ -49,7 +49,7 @@ void GTTracer::setConfiguration(GTTracerSetting arg) {
 }
 
 void GTTracer::buildScene() {
-  if (userSceneActive) scene->buildUserScene();
+  if (userSceneActive) scene->buildUserScene(chessboardActive, refractionActive);
   else scene->buildDefaultScene(chessboardActive, refractionActive);
 }
 

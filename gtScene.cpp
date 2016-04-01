@@ -32,7 +32,9 @@ void GTScene::addModel(GTModel *arg) {
   modelList.push_back(arg);
 }
 
-void GTScene::buildUserScene() { }
+void GTScene::buildUserScene(bool chessboard, bool refract) {
+  buildDefaultScene(chessboard, refract);
+}
 
 void GTScene::buildDefaultScene(bool chessboard, bool refract) {
   background_color = vec3(0.5, 0.05, 0.8);
