@@ -28,11 +28,15 @@ namespace GTCalc {
 class GTObject {
 public:
   vec3 position;
+
+  virtual ~GTObject() { }
 };
 
 class GTLight : public GTObject {
 public:
   vec3 intensity;
+
+  ~GTLight() { }
 };
 
 class GTModel : public GTObject {
@@ -49,6 +53,8 @@ public:
   float refractivity;
   float refractance;
 
+  ~GTModel() { }
+
   virtual vec3 getNormal(vec3 surfPoint);
   virtual vec3 getAmbient(vec3 point);
   virtual vec3 getDiffuse(vec3 point);
@@ -62,6 +68,7 @@ class GTSphere : public GTModel {
 public:
   float radius;
 
+  ~GTSphere() { }
   vec3 getNormal(vec3 surfPoint);
   vec3 getAmbient(vec3 point);
   vec3 getDiffuse(vec3 point);
@@ -79,13 +86,29 @@ public:
   int xLength;
   int zLength;
 
-  vec3 getNormal(vec3 surfPoint);
+  ~GTPlane() { };
   vec3 getAmbient(vec3 point);
   vec3 getDiffuse(vec3 point);
   vec3 getSpecular(vec3 point);
+  vec3 getNormal(vec3 surfPoint);
   float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
   float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
   bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
+};
+
+class GTBoundary : public GTModel {
+public:
+  vec3 normal;
+  float xLength;
+  float yLength;
+  float zLength;
+
+  ~GTBoundary() { };
+
+  vec3 getNormal(vec3 surfPoint);
+  float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
+//  float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
+//  bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
 };
 
 class GTTriangle : public GTModel {
@@ -93,6 +116,11 @@ public:
   vec3 vertex[3];
   vec3 vector[2];
   vec3 normal;
+
+  ~GTTriangle() {
+    std::cout << "Recycle Group\n";
+    if(modelGroup)  delete modelGroup;
+  };
 
   vec3 getNormal(vec3 surfPoint);
   vec3 getAmbient(vec3 point);

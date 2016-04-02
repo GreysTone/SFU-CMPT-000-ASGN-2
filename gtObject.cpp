@@ -29,35 +29,29 @@ vec3 GTModel::getNormal(vec3 surfPoint) {
   vec3 empty = vec3(0.0, 0.0, 0.0);
   return empty;
 }
-
 float GTModel::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   return 0;
 }
-
 vec3 GTModel::getAmbient(vec3 point) {
   return ambient;
 }
-
 vec3 GTModel::getDiffuse(vec3 point) {
   return diffuse;
 }
-
 vec3 GTModel::getSpecular(vec3 point) {
   return specular;
 }
-
 bool GTModel::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
   return false;
 }
-
 float GTModel::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
   return 0;
 }
 
+
 vec3 GTSphere::getNormal(vec3 surfPoint) {
   return glm::normalize(surfPoint - this->position);
 }
-
 /**********************************************************************
  * This function intersects a ray with a given sphere 'sph'. You should
  * use the parametric representation of a line and do the intersection.
@@ -105,19 +99,15 @@ float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
     }
   }
 }
-
 vec3 GTSphere::getAmbient(vec3 point) {
   return GTModel::getAmbient(point);
 }
-
 vec3 GTSphere::getDiffuse(vec3 point) {
   return GTModel::getDiffuse(point);
 }
-
 vec3 GTSphere::getSpecular(vec3 point) {
   return GTModel::getSpecular(point);
 }
-
 bool GTSphere::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
   vec3 normal = getNormal(inPoint);
   vec3 in = glm::normalize(-inRay);
@@ -149,7 +139,6 @@ bool GTSphere::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
 //  *outRay = normal * ( refraction_index * glm::dot(normal,in) - sqrt(root) ) - refraction_index * in;
 //  return true;
 }
-
 float GTSphere::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
   vec3 mid, out;
   vec3 endPoint;
@@ -164,10 +153,10 @@ float GTSphere::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint
   return 1.0f;
 }
 
+
 vec3 GTPlane::getNormal(vec3 surfPoint) {
   return glm::normalize(normal);
 }
-
 /*
  * Ray: X = E + t(R)        : Eye, Ray
  * Plane: X * N = P * N     : Normal, Point
@@ -190,7 +179,6 @@ float GTPlane::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   *hit = point;
   return t;
 }
-
 vec3 GTPlane::getAmbient(vec3 point) {
   vec3 range = point - position;
   int x = (int) floor(glm::dot(range, xAxis));
@@ -198,7 +186,6 @@ vec3 GTPlane::getAmbient(vec3 point) {
   if ((x + z) % 2 == 0) return vec3(1.0, 1.0, 1.0);
   else return vec3(0.3, 0.3, 0.3);
 }
-
 vec3 GTPlane::getDiffuse(vec3 point) {
   vec3 range = point - position;
   int x = (int) floor(glm::dot(range, xAxis));
@@ -206,7 +193,6 @@ vec3 GTPlane::getDiffuse(vec3 point) {
   if ((x + z) % 2 == 0) return glm::vec3(1.0, 1.0, 1.0);
   else return glm::vec3(0.0, 0.0, 0.0);
 }
-
 vec3 GTPlane::getSpecular(vec3 point) {
 //  return GTModel::getSpecular(point);
   vec3 range = point - position;
@@ -215,11 +201,9 @@ vec3 GTPlane::getSpecular(vec3 point) {
   if ((x + z) % 2 == 0) return glm::vec3(1.0, 1.0, 1.0);
   else return glm::vec3(0.3, 0.3, 0.3);
 }
-
 bool GTPlane::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
   return GTModel::refractRay(inRay, inPoint, outRay);
 }
-
 float GTPlane::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
   return GTModel::refracted(inRay, inPoint, outRay, outPoint);
 }
@@ -228,19 +212,15 @@ float GTPlane::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint)
 vec3 GTTriangle::getNormal(vec3 surfPoint) {
   return normal;
 }
-
 vec3 GTTriangle::getAmbient(vec3 point) {
   return GTModel::getAmbient(point);
 }
-
 vec3 GTTriangle::getDiffuse(vec3 point) {
   return GTModel::getDiffuse(point);
 }
-
 vec3 GTTriangle::getSpecular(vec3 point) {
   return GTModel::getSpecular(point);
 }
-
 float GTTriangle::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   vec3 &E1 = vector[0];
   vec3 &E2 = vector[1];
@@ -283,7 +263,6 @@ float GTTriangle::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   *hit = (O + t * D);
   return t;
 }
-
 float GTTriangle::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
   vec3 mid, out;
   vec3 endPoint;
@@ -297,7 +276,6 @@ float GTTriangle::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoi
   *outPoint = endPoint;
   return 1.0f;
 }
-
 bool GTTriangle::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
   vec3 normal = getNormal(inPoint);
   vec3 in = glm::normalize(-inRay);
@@ -323,11 +301,9 @@ bool GTTriangle::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
   *outRay = out;
   return true;
 }
-
 void GTTriangle::setReference(std::list<GTModel *> *ref) {
   modelGroup = ref;
 }
-
 float GTTriangle::groupIntersect(vec3 eye, vec3 ray, vec3 *hit) {
   float value, minValue;
   vec3 tmpPoint, minPoint = vec3(0.0, 0.0, 0.0);
@@ -353,16 +329,27 @@ float GTTriangle::groupIntersect(vec3 eye, vec3 ray, vec3 *hit) {
 }
 
 
+vec3 GTBoundary::getNormal(vec3 surfPoint) {
+  return normal;
+}
+float GTBoundary::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
+  float Right = glm::dot((position - eye), normal);
+  float Left = glm::dot(ray, normal);
+  if (Left > -GTCalc::precision && Left < GTCalc::precision) return -1.0f;
 
+  float t = Right / Left;
+  if (t < GTCalc::precision) return -1.0f;
 
+  vec3 point = eye + t * ray;
+  vec3 cast = point - position;
 
+  if (fabsf(glm::dot(cast, vec3(1, 0, 0))) > xLength / 2) return -1.0f;
+  if (fabsf(glm::dot(cast, vec3(0, 1, 0))) > yLength / 2) return -1.0f;
+  if (fabsf(glm::dot(cast, vec3(0, 0, 1))) > zLength / 2) return -1.0f;
 
-
-
-
-
-
-
+  *hit = point;
+  return t;
+}
 
 
 

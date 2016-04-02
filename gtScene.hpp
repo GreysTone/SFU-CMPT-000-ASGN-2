@@ -32,6 +32,8 @@ class GTScene {
   vec3 null_color;
 
   void buildModelFromFile(FILE *fp, bool refract, vec3 translation, float scale);
+  void buildFastModelFromFile(FILE *fp, bool refract, vec3 translation, float scale);
+  void buildBoundaryWithRange(float minx, float maxx, float miny, float maxy, float minz, float maxz);
 public:
   vec3 background_color;
 
@@ -44,6 +46,8 @@ public:
   std::list<GTLight> lightList;
   std::list<GTModel *> modelList;
 
+  GTTriangle *meshListCycle;
+
   GTScene();
 
   ~GTScene();
@@ -53,7 +57,7 @@ public:
 
   void buildUserScene(bool chessboard, bool refract);
   void buildDefaultScene(bool chessboard, bool refract);
-  void buildBonusScene(bool chessboard, bool refract);
+  void buildBonusScene(bool fastbonus, bool refract);
 
   bool intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTModel *>::iterator ignore);
 };

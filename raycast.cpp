@@ -245,6 +245,16 @@ int main(int argc, char **argv) {
 
   // user defined scene
   if (strcmp(argv[1], "-u") == 0) options |= USER_SCENE;
+  if (strcmp(argv[1], "bonus") == 0) {
+//      options = USER_SCENE | SHADOW | REFLECTION | CHESSBOARD | REFRACTION | STOCHASTIC_DIFFUSE | ANTIALIAS;
+    options = USER_SCENE | SHADOW | REFLECTION | CHESSBOARD | REFRACTION | STOCHASTIC_DIFFUSE | ANTIALIAS;
+    options |= BONUS;
+  }
+  if (strcmp(argv[1], "fbonus") == 0) {
+//      options = USER_SCENE | SHADOW | REFLECTION | CHESSBOARD | REFRACTION | STOCHASTIC_DIFFUSE | ANTIALIAS;
+    options = USER_SCENE  | CHESSBOARD ;
+    options |= FAST_BONUS;
+  }
 
   // maximum level of recursions
   tracer->setMaxStep(atoi(argv[2]));
@@ -257,16 +267,6 @@ int main(int argc, char **argv) {
     if (strcmp(argv[i], "+r") == 0) options |= REFRACTION;
     if (strcmp(argv[i], "+f") == 0) options |= STOCHASTIC_DIFFUSE;
     if (strcmp(argv[i], "+p") == 0) options |= ANTIALIAS;
-    if (strcmp(argv[i], "b") == 0) {
-//      options = USER_SCENE | SHADOW | REFLECTION | CHESSBOARD | REFRACTION | STOCHASTIC_DIFFUSE | ANTIALIAS;
-      options = USER_SCENE | SHADOW | REFLECTION | CHESSBOARD | REFRACTION | STOCHASTIC_DIFFUSE | ANTIALIAS;
-      options |= BONUS;
-    }
-    if (strcmp(argv[i], "fb") == 0) {
-//      options = USER_SCENE | SHADOW | REFLECTION | CHESSBOARD | REFRACTION | STOCHASTIC_DIFFUSE | ANTIALIAS;
-      options = USER_SCENE  | CHESSBOARD | STOCHASTIC_DIFFUSE | ANTIALIAS;
-      options |= FAST_BONUS;
-    }
   }
 
 //  std::cout << options << std::endl;
