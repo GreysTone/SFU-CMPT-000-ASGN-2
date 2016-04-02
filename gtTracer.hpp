@@ -32,7 +32,9 @@ enum GTTracerSetting {
   CHESSBOARD = 8,
   REFRACTION = 16,
   STOCHASTIC_DIFFUSE = 32,
-  ANTIALIAS = 64
+  ANTIALIAS = 64,
+  BONUS = 128,
+  FAST_BONUS = 256
 };
 
 class GTTracer {
@@ -43,6 +45,8 @@ class GTTracer {
   bool refractionActive;
   bool stochasticActive;
   bool antiAliasActive;
+  bool bonusRenderActive;
+  bool fastBonusRenderActive;
   int maxStep;
 
   GTScene *scene;

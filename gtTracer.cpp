@@ -15,6 +15,8 @@ GTTracer::GTTracer() {
   chessboardActive = false;
   stochasticActive = false;
   antiAliasActive = false;
+  bonusRenderActive = false;
+  fastBonusRenderActive = false;
 
   maxStep = 0;
   scene = new GTScene;
@@ -51,10 +53,22 @@ void GTTracer::setConfiguration(GTTracerSetting arg) {
 
   if (arg & 64) antiAliasActive = true;
   else antiAliasActive = false;
+
+  if (arg & 128) bonusRenderActive = true;
+  else bonusRenderActive = false;
+
+  if (arg & 256) fastBonusRenderActive = true;
+  else fastBonusRenderActive = false;
 }
 
 void GTTracer::buildScene() {
-  if (userSceneActive) scene->buildUserScene(chessboardActive, refractionActive);
+  if (userSceneActive) {
+    if(bonusRenderActive || fastBonusRenderActive) {
+      scene->buildBonusScene(chessboardActive, refractionActive);
+    } else {
+      scene->buildUserScene(chessboardActive, refractionActive);
+    }
+  }
   else scene->buildDefaultScene(chessboardActive, refractionActive);
 }
 
@@ -96,6 +110,9 @@ void GTTracer::traceRay() {
   };
 
   for (i = 0; i < win_height; i++) {
+#ifdef SHOW_PROGRESS
+    std::cout << "rendering: " << i+1 << "/" << win_height << "\n";
+#endif
     for (j = 0; j < win_width; j++) {
 
       if(antiAliasActive) {
@@ -114,18 +131,6 @@ void GTTracer::traceRay() {
         ret_color = recursive_ray_trace(scene->eye_pos, ray, light, 0);
       }
 
-      ////
-      // You need to change this!!!
-
-      // ret_color = recursive_ray_trace();
-//        ret_color = background_clr; // just background for now
-//      ret_color = scene->background_color;
-
-      // Parallel rays can be cast instead using below
-      //
-      // ray.x = ray.y = 0;
-      // ray.z = -1.0;
-      // ret_color = recursive_ray_trace(cur_pixel_pos, ray, 1);
 
 // Checkboard for testing
 //        RGB_float clr = {float(i/32), 0, float(j/32)};

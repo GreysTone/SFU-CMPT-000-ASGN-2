@@ -85,4 +85,19 @@ public:
   bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
 };
 
+class GTTriangle : public GTModel {
+public:
+  vec3 vertex[3];
+  vec3 vector[2];
+  vec3 normal;
+
+  vec3 getNormal(vec3 surfPoint);
+  vec3 getAmbient(vec3 point);
+  vec3 getDiffuse(vec3 point);
+  vec3 getSpecular(vec3 point);
+  float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
+  float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
+  bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
+};
+
 #endif /* gtObject_hpp */

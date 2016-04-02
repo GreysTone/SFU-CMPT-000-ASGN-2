@@ -96,7 +96,7 @@ float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
       *hit = eye + t1 * ray;
       return t1;
     } else {
-      if(far) {
+      if (far) {
         *hit = eye + t1 * ray;
         return t1;
       } else {
@@ -155,11 +155,11 @@ float GTSphere::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint
   vec3 mid, out;
   vec3 endPoint;
 
-  if(!refractRay(inRay, inPoint, &mid)) return -1.0f;
+  if (!refractRay(inRay, inPoint, &mid)) return -1.0f;
   float inLength = intersect(inPoint, mid, &endPoint, true);
-  if(inLength < GTCalc::precision) return -1.0f;
+  if (inLength < GTCalc::precision) return -1.0f;
 
-  if(!refractRay(mid, endPoint, &out)) return -1.0f;
+  if (!refractRay(mid, endPoint, &out)) return -1.0f;
   *outRay = out;
   *outPoint = endPoint;
   return 1.0f;
@@ -224,6 +224,106 @@ bool GTPlane::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
 float GTPlane::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
   return GTModel::refracted(inRay, inPoint, outRay, outPoint);
 }
+
+
+vec3 GTTriangle::getNormal(vec3 surfPoint) {
+  return normal;
+}
+
+vec3 GTTriangle::getAmbient(vec3 point) {
+  return GTModel::getAmbient(point);
+}
+
+vec3 GTTriangle::getDiffuse(vec3 point) {
+  return GTModel::getDiffuse(point);
+}
+
+vec3 GTTriangle::getSpecular(vec3 point) {
+  return GTModel::getSpecular(point);
+}
+
+float GTTriangle::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
+  vec3 &E1 = vector[0];
+  vec3 &E2 = vector[1];
+  vec3 D = glm::normalize(ray);
+  vec3 &O = eye;
+  vec3 P = glm::cross(D, E2);
+
+  // determinant
+  float det = glm::dot(E1, P);
+
+  // keep det > 0, modify T accordingly
+  vec3 T;
+  if (det > 0)T = O - vertex[0];
+  else {
+    T = vertex[0] - O;
+    det = -det;
+  }
+
+  // If determinant is near zero, ray lies in plane of triangle
+  if (det < GTCalc::precision)  return -1.0f;
+
+  // Calculate u and make sure u <= 1
+  float u = glm::dot(T, P);
+  if (u < 0.0f || u > det)      return -1.0f;
+
+  // Q
+  vec3 Q = glm::cross(T, E1);
+  // Calculate v and make sure u + v <= 1
+  float v = glm::dot(D, Q);
+  if (v < 0.0f || u + v > det)  return -1.0f;
+
+  // Calculate t, scale parameters, ray intersects triangle
+  float t = glm::dot(E2, Q);
+
+  float fInvDet = 1.0f / det;
+  t *= fInvDet;
+//  u *= fInvDet;
+//  v *= fInvDet;
+
+  *hit = (O + t * D);
+  return t;
+}
+
+float GTTriangle::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
+  return GTModel::refracted(inRay, inPoint, outRay, outPoint);
+
+}
+
+bool GTTriangle::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
+  vec3 normal = getNormal(inPoint);
+  vec3 in = glm::normalize(-inRay);
+  vec3 out;
+
+  float refraction_index;
+  if (glm::dot(in, normal) > GTCalc::precision) {
+    refraction_index = 1 / refractivity;
+  } else {
+    normal = -normal;
+    refraction_index = refractivity;
+  }
+
+  float m = glm::dot(in, normal);
+  float a_square = 1 - pow(m, 2);
+  float b_square = a_square * pow(refraction_index, 2);
+  float n_square = 1 - b_square;
+
+  if (n_square < GTCalc::precision) return false;
+  float n = sqrt(n_square);
+
+  out = normal * (m * refraction_index - n) - refraction_index * in;
+  *outRay = out;
+  return true;
+}
+
+
+
+
+
+
+
+
+
 
 
 

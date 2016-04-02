@@ -9,6 +9,7 @@
 #ifndef gtScene_hpp
 #define gtScene_hpp
 
+#include <stdio.h>
 #include <list>
 #include <vector>
 #include "include/glm/glm.hpp"
@@ -19,6 +20,8 @@
 
 using namespace glm;
 
+#define SHOW_PROGRESS
+
 typedef struct match {
   vec3 point;
   float value;
@@ -27,6 +30,8 @@ typedef struct match {
 
 class GTScene {
   vec3 null_color;
+
+  void buildModelFromFile(FILE *fp, bool refract, vec3 translation, float scale);
 public:
   vec3 background_color;
 
@@ -48,6 +53,7 @@ public:
 
   void buildUserScene(bool chessboard, bool refract);
   void buildDefaultScene(bool chessboard, bool refract);
+  void buildBonusScene(bool chessboard, bool refract);
 
   bool intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTModel *>::iterator ignore);
 };
