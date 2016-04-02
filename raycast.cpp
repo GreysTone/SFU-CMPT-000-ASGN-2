@@ -256,6 +256,7 @@ int main(int argc, char **argv) {
     if (strcmp(argv[i], "+c") == 0) options |= CHESSBOARD;
     if (strcmp(argv[i], "+r") == 0) options |= REFRACTION;
     if (strcmp(argv[i], "+f") == 0) options |= STOCHASTIC_DIFFUSE;
+    if (strcmp(argv[i], "+p") == 0) options |= ANTIALIAS;
   }
 
 //  std::cout << options << std::endl;
@@ -263,13 +264,7 @@ int main(int argc, char **argv) {
   tracer->setConfiguration((GTTracerSetting)options);
   tracer->buildScene();
 
-  //
-  // ray trace the scene now
-  //
-  // we have used so many global variables and this function is
-  // happy to carry no parameters
-  //
-
+  // ray trace the scene
   tracer->traceRay();
 
   // we want to make sure that intensity values are normalized

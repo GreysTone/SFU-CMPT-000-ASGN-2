@@ -13,6 +13,8 @@ GTTracer::GTTracer() {
   shadowActive = false;
   reflectionActive = false;
   chessboardActive = false;
+  stochasticActive = false;
+  antiAliasActive = false;
 
   maxStep = 0;
   scene = new GTScene;
@@ -46,6 +48,9 @@ void GTTracer::setConfiguration(GTTracerSetting arg) {
 
   if (arg & 32) stochasticActive = true;
   else stochasticActive = false;
+
+  if (arg & 64) antiAliasActive = true;
+  else antiAliasActive = false;
 }
 
 void GTTracer::buildScene() {
@@ -78,18 +83,36 @@ void GTTracer::traceRay() {
   cur_pixel_pos.y = y_start + 0.5f * y_grid_size;
   cur_pixel_pos.z = scene->image_plane;
 
+  // setup light source
+  std::list<GTLight>::iterator it = scene->lightList.begin();
+  GTLight &light = *(it);
+
+  vec3 antiAliasArray[5] = {
+      vec3(-0.25f,  0.25f, 0.0f),
+      vec3( 0.25f,  0.25f, 0.0f),
+      vec3( 0.00f,  0.00f, 0.0f),
+      vec3(-0.25f, -0.25f, 0.0f),
+      vec3( 0.25f, -0.25f, 0.0f)
+  };
 
   for (i = 0; i < win_height; i++) {
     for (j = 0; j < win_width; j++) {
-      ray = cur_pixel_pos - scene->eye_pos;
 
-
-      // setup light source
-      std::list<GTLight>::iterator it = scene->lightList.begin();
-      GTLight &light = *(it);
-
-      ret_color = recursive_ray_trace(scene->eye_pos, ray, light, 0);
-
+      if(antiAliasActive) {
+        ret_color = vec3(0.0, 0.0, 0.0);
+        for(int k = 0; k < 5; k++) {
+          vec3 offset;
+          offset.x = antiAliasArray[k].x * x_grid_size;
+          offset.y = antiAliasArray[k].y * y_grid_size;
+          offset.z = antiAliasArray[k].z;
+          ray = (cur_pixel_pos + offset) - scene->eye_pos;
+          ret_color += recursive_ray_trace(scene->eye_pos, ray, light, 0);
+        }
+        ret_color /= 5;
+      } else {
+        ray = cur_pixel_pos - scene->eye_pos;
+        ret_color = recursive_ray_trace(scene->eye_pos, ray, light, 0);
+      }
 
       ////
       // You need to change this!!!
@@ -179,6 +202,7 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<G
       reflection = glm::normalize(reflection);
 
       vec3 color_ref = recursive_ray_trace(pointSurf, reflection, light, step + 1);
+      // TODO: unknown argument
       color += color_ref * (float)(0.5 / STOCHASTIC_RAY_COUNT);
     }
   }
