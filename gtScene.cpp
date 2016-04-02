@@ -239,6 +239,8 @@ void GTScene::buildModelFromFile(FILE *fp, bool refract, vec3 translation, float
   }
   int v[3];
   GTTriangle *meshList = new GTTriangle[mesh_count];
+  //TODO: recycle list;
+  std::list<GTModel *> *objectGroup = new std::list<GTModel *>;
   for(int i=0; i< mesh_count; i++) {
     ret = fscanf(fp, "%c%d%d%d\n", &flag, &(v[0]), &(v[1]), &(v[2]));
     meshList[i].vertex[0] = vertexList[v[0]-1];
@@ -257,10 +259,12 @@ void GTScene::buildModelFromFile(FILE *fp, bool refract, vec3 translation, float
       meshList[i].refractance = 0.5;
       meshList[i].refractivity = 1.5;
     }
+    meshList[i].setReference(objectGroup);
   }
   for (int i = 0; i < mesh_count; i++) {
     GTModel *model = &(meshList[i]);
     addModel(model);
+    objectGroup->push_back(model);
   }
   if(!ret) std::cout << "release ret\n";
   delete[] vertexList;

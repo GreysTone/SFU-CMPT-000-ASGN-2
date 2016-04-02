@@ -259,7 +259,7 @@ int main(int argc, char **argv) {
     if (strcmp(argv[i], "+p") == 0) options |= ANTIALIAS;
     if (strcmp(argv[i], "b") == 0) {
 //      options = USER_SCENE | SHADOW | REFLECTION | CHESSBOARD | REFRACTION | STOCHASTIC_DIFFUSE | ANTIALIAS;
-      options = USER_SCENE | SHADOW | REFLECTION | CHESSBOARD;
+      options = USER_SCENE | SHADOW | REFLECTION | CHESSBOARD | REFRACTION | STOCHASTIC_DIFFUSE | ANTIALIAS;
       options |= BONUS;
     }
     if (strcmp(argv[i], "fb") == 0) {

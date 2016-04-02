@@ -54,7 +54,6 @@ float GTModel::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint)
   return 0;
 }
 
-
 vec3 GTSphere::getNormal(vec3 surfPoint) {
   return glm::normalize(surfPoint - this->position);
 }
@@ -286,8 +285,17 @@ float GTTriangle::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
 }
 
 float GTTriangle::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
-  return GTModel::refracted(inRay, inPoint, outRay, outPoint);
+  vec3 mid, out;
+  vec3 endPoint;
 
+  if (!refractRay(inRay, inPoint, &mid)) return -1.0f;
+//  float inLength = intersect(inPoint, mid, &endPoint, true);
+  if (!groupIntersect(inPoint, mid, &endPoint)) return -1.0f;
+
+  if (!refractRay(mid, endPoint, &out)) return -1.0f;
+  *outRay = out;
+  *outPoint = endPoint;
+  return 1.0f;
 }
 
 bool GTTriangle::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
@@ -315,6 +323,36 @@ bool GTTriangle::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
   *outRay = out;
   return true;
 }
+
+void GTTriangle::setReference(std::list<GTModel *> *ref) {
+  modelGroup = ref;
+}
+
+float GTTriangle::groupIntersect(vec3 eye, vec3 ray, vec3 *hit) {
+  float value, minValue;
+  vec3 tmpPoint, minPoint = vec3(0.0, 0.0, 0.0);
+  std::list<GTModel *>::iterator tmpIt, minIt = modelGroup->end();
+  bool setMatch = false;
+  for (std::list<GTModel *>::iterator it = modelGroup->begin(); it != modelGroup->end(); ++it) {
+    GTModel *object = (*it);
+    value = object->intersect(eye, ray, &(tmpPoint), false);
+    tmpIt = it;
+    if(value < GTCalc::precision) continue;
+    if(tmpPoint == eye) continue; //TODO: ignore self, not sure
+    if(!setMatch || value < minValue) {
+      setMatch = true;
+      minValue = value;
+      minPoint = tmpPoint;
+      minIt = tmpIt;
+    }
+  }
+
+  *hit = minPoint;
+  if(minIt == modelGroup->end()) return false;
+  else return true;
+}
+
+
 
 
 

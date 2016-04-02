@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <list>
 #include "include/glm/glm.hpp"
 #include "include/glm/gtc/matrix_transform.hpp"
 #include "include/glm/gtc/type_ptr.hpp"
@@ -35,6 +36,8 @@ public:
 };
 
 class GTModel : public GTObject {
+protected:
+  std::list<GTModel *> *modelGroup;
 public:
   vec3 ambient;
   vec3 diffuse;
@@ -98,6 +101,9 @@ public:
   float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
   float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
   bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
+
+  void setReference(std::list<GTModel *> *ref);
+  float groupIntersect(vec3 inPoint, vec3 inRay, vec3* hit);
 };
 
 #endif /* gtObject_hpp */
