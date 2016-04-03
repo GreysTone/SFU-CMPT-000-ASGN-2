@@ -13,6 +13,7 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <map>
 #include "include/glm/glm.hpp"
 #include "include/glm/gtc/matrix_transform.hpp"
 #include "include/glm/gtc/type_ptr.hpp"
@@ -77,7 +78,7 @@ public:
   virtual vec3 getSpecular(vec3 point);
 
   virtual float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
-  virtual void getIntersectingObject(std::vector<GTModel *> &container);
+  virtual void getIntersectingObject(vec3 eye, vec3 ray, std::vector<GTModel *> *container);
 
   virtual float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint);
 
@@ -155,15 +156,14 @@ class GTChessBoard : public GTPlane {
 };
 
 class GTOctTree {
+public:
   bool isLeaf;
   float xmin, xmax;
   float ymin, ymax;
   float zmin, zmax;
-
+  vec3 cubeMin, cubeMax;
   GTOctTree *space;
   std::vector<GTModel *> content;
-public:
-  vec3 cubeMin, cubeMax;
 
   GTOctTree();
 
@@ -187,7 +187,8 @@ public:
   GTPlane box[6];
   GTOctTree root;
 
-  void getIntersectingObject(std::vector<GTModel *> &container);
+  void getIntersectingObject(vec3 eye, vec3 ray, std::vector<GTModel *> *container);
+  GTOctTree *locateTree(GTOctTree *tree, vec3 position);
 };
 
 #endif /* gtObject_hpp */

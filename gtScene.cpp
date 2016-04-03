@@ -210,7 +210,7 @@ bool GTScene::intersectFastScene(vec3 eye, vec3 ray, Match *result, GTModel *ign
   std::vector<GTModel *> actualModelList;
   for(std::vector<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
     if(!((*it)->isVirtual)) actualModelList.push_back((*it));
-    else (*it)->getIntersectingObject(actualModelList);
+    else (*it)->getIntersectingObject(eye, ray, &(actualModelList));
   }
 
   Match tmpMatch, minMatch;
