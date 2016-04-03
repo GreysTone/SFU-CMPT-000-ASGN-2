@@ -64,53 +64,6 @@ public:
   virtual bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
 };
 
-class GTSphere : public GTModel {
-public:
-  float radius;
-
-  ~GTSphere() { }
-  vec3 getNormal(vec3 surfPoint);
-  vec3 getAmbient(vec3 point);
-  vec3 getDiffuse(vec3 point);
-  vec3 getSpecular(vec3 point);
-  float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
-  float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
-  bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
-};
-
-class GTPlane : public GTModel {
-public:
-  vec3 normal;
-  vec3 xAxis;
-  vec3 zAxis;
-  int xLength;
-  int zLength;
-
-  ~GTPlane() { };
-  vec3 getAmbient(vec3 point);
-  vec3 getDiffuse(vec3 point);
-  vec3 getSpecular(vec3 point);
-  vec3 getNormal(vec3 surfPoint);
-  float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
-  float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
-  bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
-};
-
-class GTBoundary : public GTModel {
-public:
-  vec3 normal;
-  float xLength;
-  float yLength;
-  float zLength;
-
-  ~GTBoundary() { };
-
-  vec3 getNormal(vec3 surfPoint);
-  float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
-//  float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
-//  bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
-};
-
 class GTTriangle : public GTModel {
 public:
   vec3 vertex[3];
@@ -123,15 +76,54 @@ public:
   };
 
   vec3 getNormal(vec3 surfPoint);
-  vec3 getAmbient(vec3 point);
-  vec3 getDiffuse(vec3 point);
-  vec3 getSpecular(vec3 point);
   float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
   float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
   bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
 
   void setReference(std::list<GTModel *> *ref);
   float groupIntersect(vec3 inPoint, vec3 inRay, vec3* hit);
+};
+
+class GTPlane : public GTModel {
+public:
+  vec3 normal;
+  float xLength;
+  float yLength;
+  float zLength;
+
+  ~GTPlane() { }
+
+  vec3 getNormal(vec3 surfPoint);
+  virtual float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
+};
+
+class GTSphere : public GTModel {
+public:
+  float radius;
+
+  ~GTSphere() { }
+  vec3 getNormal(vec3 surfPoint);
+  float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
+  float refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3* outPoint);
+  bool refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay);
+};
+
+
+class GTChessBoard : public GTPlane {
+  ~GTChessBoard() {}
+
+  vec3 getAmbient(vec3 point);
+  vec3 getDiffuse(vec3 point);
+  vec3 getSpecular(vec3 point);
+
+  float intersect(vec3 eye, vec3 ray, vec3 *hit, bool far);
+};
+
+
+class GTObjectBox : public GTModel {
+public:
+  ~GTObjectBox() {}
+  GTPlane box[6];
 };
 
 #endif /* gtObject_hpp */

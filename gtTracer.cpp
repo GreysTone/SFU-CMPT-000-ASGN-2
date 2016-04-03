@@ -208,7 +208,7 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<G
 
       vec3 color_ref = recursive_ray_trace(pointSurf, reflection, light, step + 1);
       // TODO: unknown argument
-      color += color_ref * (float)(0.5 / STOCHASTIC_RAY_COUNT);
+      color += color_ref * (float)(1.0 / STOCHASTIC_RAY_COUNT);
     }
   }
 
