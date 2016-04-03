@@ -25,7 +25,7 @@ CC= g++
 # The flags that will be used to compile the object file.
 # If you want to debug your program,
 # you can add '-g' on the following line
-CFLAGS= -O3 -std=c++0x -g -Wall -pedantic -DGL_GLEXT_PROTOTYPES -pg
+CFLAGS= -O3 -std=c++0x -g -Wall -pedantic -DGL_GLEXT_PROTOTYPES -pg -fopenmp
 
 # The name of the final executable 
 EXECUTABLE= raycast

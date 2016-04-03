@@ -26,9 +26,6 @@ void GTScene::addLight(GTLight arg) {
   lightList.push_back(arg);
 }
 
-/*void GTScene::addModel(GTSphere arg) {
-  modelList.push_back(arg);
-}*/
 void GTScene::addModel(GTModel *arg) {
   modelList.push_back(arg);
 }
