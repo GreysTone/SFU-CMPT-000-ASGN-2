@@ -187,37 +187,46 @@ bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::vector<GTMo
   minMatch.itor = modelList.end();  // set exit boundary
   minMatch.it = (int)modelList.size();
   bool setMatch = false;
-  for (std::vector<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
-    if (it == ignore) continue;
-    GTModel *object = (*it);
-    tmpMatch.value = object->intersect(eye, ray, &(tmpMatch.point), false);
-    tmpMatch.itor = it;
-    if (tmpMatch.value < GTCalc::precision) continue;
-    if (!setMatch || tmpMatch.value < minMatch.value) {
-      setMatch = true;
-      minMatch = tmpMatch;
-    }
-  }
+//  for (std::vector<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
+//    if (it == ignore) continue;
+//    GTModel *object = (*it);
+//    tmpMatch.value = object->intersect(eye, ray, &(tmpMatch.point), false);
+//    tmpMatch.itor = it;
+//    if (tmpMatch.value < GTCalc::precision) continue;
+//    if (!setMatch || tmpMatch.value < minMatch.value) {
+//      setMatch = true;
+//      minMatch = tmpMatch;
+//    }
+//  }
 
   // ******** parallel multi-cores accelerate
 
-//  Match *matchBox = new Match[modelList.size()];
-//#pragma omp parallel for shared(matchBox)
-//    for (int it = 0; it < (int)modelList.size(); ++it) {
-//      if (modelList[it] == (*ignore)) continue;
-//      GTModel *object = (modelList[it]);
-//      matchBox[it].value = object->intersect(eye, ray, &(matchBox[it].point), false);
-//      matchBox[it].it = it;
-//      matchBox[it].itor = std::find(modelList.begin(), modelList.end(), object);
-//  }
-//
-//  for(int i = 0; i < (int)modelList.size(); i++) {
-//      if((!setMatch || matchBox[i].value < minMatch.value) && matchBox[i].value > -GTCalc::precision) {
-//        minMatch = matchBox[i];
+  Match *matchBox = new Match[modelList.size()];
+//  std::vector<GTModel *>::iterator rasing = modelList.begin();
+#pragma omp parallel for
+    for (int it = 0; it < (int)modelList.size(); ++it) {
+      if (modelList[it] == (*ignore)) continue;
+      GTModel *object = (modelList[it]);
+//      Match tmpMatch;
+      matchBox[it].value = object->intersect(eye, ray, &(matchBox[it].point), false);
+      matchBox[it].it = it;
+      matchBox[it].itor = modelList.begin() + it;
+//      tmpMatch.value = object->intersect(eye, ray, &(tmpMatch.point), false);
+//      tmpMatch.itor = modelList.begin() + it;
+//      if (!setMatch || tmpMatch.value < minMatch.value) {
+//        setMatch = true;
+//        minMatch = tmpMatch;
 //      }
-//  }
-//
-//  delete[] matchBox;
+  }
+
+  for(int i = 0; i < (int)modelList.size(); i++) {
+      if((!setMatch || matchBox[i].value < minMatch.value) && matchBox[i].value > -GTCalc::precision) {
+        setMatch = true;
+        minMatch = matchBox[i];
+      }
+  }
+
+  delete[] matchBox;
 
   // ********
 
