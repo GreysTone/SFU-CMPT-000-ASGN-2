@@ -63,7 +63,7 @@ void GTTracer::setConfiguration(GTTracerSetting arg) {
 
 void GTTracer::buildScene() {
   if (userSceneActive) {
-    if(bonusRenderActive || fastBonusRenderActive) {
+    if (bonusRenderActive || fastBonusRenderActive) {
       scene->buildBonusScene(chessboardActive, refractionActive);
     } else {
       scene->buildUserScene(chessboardActive, refractionActive);
@@ -83,78 +83,80 @@ inline float max(float a, float b) { return a > b ? a : b; }
 * if you must.
 *********************************************************************/
 void GTTracer::traceRay() {
-  int i, j;
+//  int i, j;
   float x_grid_size = image_width / float(win_width);
   float y_grid_size = image_height / float(win_height);
   float x_start = -0.5f * image_width;
   float y_start = -0.5f * image_height;
-  vec3 ret_color;
-  vec3 cur_pixel_pos;
-  vec3 ray;
+//  vec3 ret_color;
+//  vec3 cur_pixel_pos;
+
+//  vec3 ray;
 
   // ray is cast through center of pixel
-  cur_pixel_pos.x = x_start + 0.5f * x_grid_size;
-  cur_pixel_pos.y = y_start + 0.5f * y_grid_size;
-  cur_pixel_pos.z = scene->image_plane;
+//  cur_pixel_pos.x = x_start + 0.5f * x_grid_size;
+//  cur_pixel_pos.y = y_start + 0.5f * y_grid_size;
+//  cur_pixel_pos.z = scene->image_plane;
+  float curPixelPosX = x_start + 0.5f * x_grid_size;
+  float curPixelPosY = y_start + 0.5f * y_grid_size;
+  float curPixelPosZ = scene->image_plane;
 
   // setup light source
   std::list<GTLight>::iterator it = scene->lightList.begin();
   GTLight &light = *(it);
 
   vec3 antiAliasArray[5] = {
-      vec3(-0.25f,  0.25f, 0.0f),
-      vec3( 0.25f,  0.25f, 0.0f),
-      vec3( 0.00f,  0.00f, 0.0f),
+      vec3(-0.25f, 0.25f, 0.0f),
+      vec3(0.25f, 0.25f, 0.0f),
+      vec3(0.00f, 0.00f, 0.0f),
       vec3(-0.25f, -0.25f, 0.0f),
-      vec3( 0.25f, -0.25f, 0.0f)
+      vec3(0.25f, -0.25f, 0.0f)
   };
 
-  for (i = 0; i < win_height; i++) {
-#ifdef SHOW_PROGRESS
-    std::cout << "rendering: " << i+1 << "/" << win_height << "\n";
-#endif
-    for (j = 0; j < win_width; j++) {
+#pragma omp parallel
+  {
+#pragma omp for
+    for (int i = 0; i < win_height; i++) {
+      std::cout << "render line: " << i + 1 << "/" << win_height << "\n";
 
-      if(antiAliasActive) {
-        ret_color = vec3(0.0, 0.0, 0.0);
-        for(int k = 0; k < 5; k++) {
-          vec3 offset;
-          offset.x = antiAliasArray[k].x * x_grid_size;
-          offset.y = antiAliasArray[k].y * y_grid_size;
-          offset.z = antiAliasArray[k].z;
-          ray = (cur_pixel_pos + offset) - scene->eye_pos;
-          ret_color += recursive_ray_trace(scene->eye_pos, ray, light, 0);
+      vec3 cur_pixel_pos = vec3(curPixelPosX, curPixelPosY + i * y_grid_size, curPixelPosZ);
+      for (int j = 0; j < win_width; j++) {
+        vec3 ret_color = vec3(0.0, 0.0, 0.0), ray;
+
+        if (antiAliasActive) {
+          for (int k = 0; k < 5; k++) {
+            vec3 offset;
+            offset.x = antiAliasArray[k].x * x_grid_size;
+            offset.y = antiAliasArray[k].y * y_grid_size;
+            offset.z = antiAliasArray[k].z;
+            ray = (cur_pixel_pos + offset) - scene->eye_pos;
+            ret_color += recursive_ray_trace(scene->eye_pos, ray, light, 0);
+          }
+          ret_color /= 5;
+        } else {
+          ray = cur_pixel_pos - scene->eye_pos;
+          ret_color = recursive_ray_trace(scene->eye_pos, ray, light, 0);
         }
-        ret_color /= 5;
-      } else {
-        ray = cur_pixel_pos - scene->eye_pos;
-        ret_color = recursive_ray_trace(scene->eye_pos, ray, light, 0);
+
+        frame[i][j][0] = GLfloat(ret_color.r);
+        frame[i][j][1] = GLfloat(ret_color.g);
+        frame[i][j][2] = GLfloat(ret_color.b);
+
+//        cur_pixel_pos.x += x_grid_size;
+        cur_pixel_pos.x = x_start + j * x_grid_size;
       }
-
-
-// Checkboard for testing
-//        RGB_float clr = {float(i/32), 0, float(j/32)};
-#ifdef GT_TEST
-      vec3 clr = vec3(float(i / 32), 0, float(j / 32));
-      ret_color = clr;
-#endif
-
-      frame[i][j][0] = GLfloat(ret_color.r);
-      frame[i][j][1] = GLfloat(ret_color.g);
-      frame[i][j][2] = GLfloat(ret_color.b);
-
-      cur_pixel_pos.x += x_grid_size;
+//      cur_pixel_pos.y += y_grid_size;
+//      cur_pixel_pos.x = x_start;
     }
-
-    cur_pixel_pos.y += y_grid_size;
-    cur_pixel_pos.x = x_start;
   }
 }
+
 
 /*********************************************************************
  * Phong illumination
  *********************************************************************/
-vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::vector<GTModel *>::iterator model, vec3 ray, int step) {
+vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::vector<GTModel *>::iterator model, vec3 ray,
+                     int step) {
   vec3 color;
 
   vec3 normLight = glm::normalize(light.position - pointSurf);
@@ -179,7 +181,8 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::vector
 
   // calculate color
   vec3 Ambient = object->getAmbient(pointSurf) * scene->global_ambient;
-  vec3 Diffuse = decayCoefficient * light.intensity * object->getDiffuse(pointSurf) * max(glm::dot(normLight, normSurf), 0.0f);
+  vec3 Diffuse =
+      decayCoefficient * light.intensity * object->getDiffuse(pointSurf) * max(glm::dot(normLight, normSurf), 0.0f);
   vec3 Specular = decayCoefficient * light.intensity * object->getSpecular(pointSurf) *
                   (float) pow(max(glm::dot(normReflect, normProject), 0.0f), object->shineness);
   color = Ambient + Diffuse + Specular;
@@ -207,14 +210,14 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::vector
       reflection = glm::normalize(reflection);
 
       vec3 color_ref = recursive_ray_trace(pointSurf, reflection, light, step + 1);
-      color += color_ref * (float)(1.0 / STOCHASTIC_RAY_COUNT);
+      color += color_ref * (float) (1.0 / STOCHASTIC_RAY_COUNT);
     }
   }
 
   // refraction
-  if (refractionActive && step < maxStep && object->refract) {
+  if (refractionActive && step < maxStep && object->isRefractObject) {
     vec3 outRay, outPoint;
-    if(object->refracted(ray, pointSurf, &outRay, &outPoint) > GTCalc::precision) {
+    if (object->refracted(ray, pointSurf, &outRay, &outPoint) > GTCalc::precision) {
       vec3 color_ref = recursive_ray_trace(outPoint, outRay, light, step + 1);
       color += color_ref * object->refractance;
     }

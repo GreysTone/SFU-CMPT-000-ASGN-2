@@ -27,7 +27,6 @@ using namespace glm;
 typedef struct match {
   vec3 point;
   float value;
-  int it;
   std::vector<GTModel *>::iterator itor;
 } Match;
 

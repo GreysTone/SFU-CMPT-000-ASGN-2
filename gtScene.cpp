@@ -55,9 +55,9 @@ void GTScene::buildDefaultScene(bool chessboard, bool refract) {
   sphere[0].shineness = 10;
   sphere[0].reflectance = 0.4;
   if (refract) {
-    sphere[0].refract = true;
+    sphere[0].isRefractObject = true;
     sphere[0].refractance = 1.0;
-    sphere[0].refractivity = 1.5;
+    sphere[0].refractiveIndex = 1.5;
   }
   // sphere 2
   sphere[1].position = vec3(-1.5, 0.0, -3.5);
@@ -68,9 +68,9 @@ void GTScene::buildDefaultScene(bool chessboard, bool refract) {
   sphere[1].shineness = 6;
   sphere[1].reflectance = 0.3;
   if (refract) {
-    sphere[1].refract = true;
+    sphere[1].isRefractObject = true;
     sphere[1].refractance = 1.0;
-    sphere[1].refractivity = 2.0;
+    sphere[1].refractiveIndex = 2.0;
   }
   // sphere 3
   sphere[2].position = vec3(-0.35, 1.75, -2.25);
@@ -81,9 +81,9 @@ void GTScene::buildDefaultScene(bool chessboard, bool refract) {
   sphere[2].shineness = 30;
   sphere[2].reflectance = 0.3;
   if (refract) {
-    sphere[2].refract = true;
+    sphere[2].isRefractObject = true;
     sphere[2].refractance = 0.5;
-    sphere[2].refractivity = 1.5;
+    sphere[2].refractiveIndex = 1.5;
   }
   for (int i = 0; i < 3; i++) {
     GTModel *model = &(sphere[i]);
@@ -103,7 +103,7 @@ void GTScene::buildDefaultScene(bool chessboard, bool refract) {
     board->shineness = 40;
     board->reflectance = 1.0;
     if (refract) {
-      board->refract = false;
+      board->isRefractObject = false;
     }
     GTModel *model = board;
     addModel(model);
@@ -170,7 +170,7 @@ void GTScene::buildBonusScene(bool fastbonus, bool refract) {
   board->shineness = 40;
   board->reflectance = 1.0;
   if (refract) {
-    board->refract = false;
+    board->isRefractObject = false;
   }
   GTModel *model = board;
   addModel(model);
@@ -185,54 +185,22 @@ void GTScene::buildBonusScene(bool fastbonus, bool refract) {
 bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::vector<GTModel *>::iterator ignore) {
   Match tmpMatch, minMatch;
   minMatch.itor = modelList.end();  // set exit boundary
-  minMatch.it = (int)modelList.size();
   bool setMatch = false;
-//  for (std::vector<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
-//    if (it == ignore) continue;
-//    GTModel *object = (*it);
-//    tmpMatch.value = object->intersect(eye, ray, &(tmpMatch.point), false);
-//    tmpMatch.itor = it;
-//    if (tmpMatch.value < GTCalc::precision) continue;
-//    if (!setMatch || tmpMatch.value < minMatch.value) {
-//      setMatch = true;
-//      minMatch = tmpMatch;
-//    }
-//  }
-
-  // ******** parallel multi-cores accelerate
-
-  Match *matchBox = new Match[modelList.size()];
-//  std::vector<GTModel *>::iterator rasing = modelList.begin();
-#pragma omp parallel for
-    for (int it = 0; it < (int)modelList.size(); ++it) {
-      if (modelList[it] == (*ignore)) continue;
-      GTModel *object = (modelList[it]);
-//      Match tmpMatch;
-      matchBox[it].value = object->intersect(eye, ray, &(matchBox[it].point), false);
-      matchBox[it].it = it;
-      matchBox[it].itor = modelList.begin() + it;
-//      tmpMatch.value = object->intersect(eye, ray, &(tmpMatch.point), false);
-//      tmpMatch.itor = modelList.begin() + it;
-//      if (!setMatch || tmpMatch.value < minMatch.value) {
-//        setMatch = true;
-//        minMatch = tmpMatch;
-//      }
+  for (std::vector<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
+    if (it == ignore) continue;
+    GTModel *object = (*it);
+    tmpMatch.value = object->intersect(eye, ray, &(tmpMatch.point), false);
+    tmpMatch.itor = it;
+    if (tmpMatch.value < GTCalc::precision) continue;
+    if (!setMatch || tmpMatch.value < minMatch.value) {
+      setMatch = true;
+      minMatch = tmpMatch;
+    }
   }
-
-  for(int i = 0; i < (int)modelList.size(); i++) {
-      if((!setMatch || matchBox[i].value < minMatch.value) && matchBox[i].value > -GTCalc::precision) {
-        setMatch = true;
-        minMatch = matchBox[i];
-      }
-  }
-
-  delete[] matchBox;
-
-  // ********
 
   *result = minMatch;
 
-  if (minMatch.it == (int)modelList.size()) return false;
+  if (minMatch.itor == modelList.end()) return false;
   else return true;
 }
 
@@ -268,9 +236,9 @@ void GTScene::buildModelFromFile(FILE *fp, bool refract, vec3 translation, float
     meshList[i].shineness = 30;
     meshList[i].reflectance = 0.3;
     if (refract) {
-      meshList[i].refract = true;
+      meshList[i].isRefractObject = true;
       meshList[i].refractance = 0.5;
-      meshList[i].refractivity = 1.5;
+      meshList[i].refractiveIndex = 1.5;
     }
     meshList[i].setReference(objectGroup);
   }
@@ -324,9 +292,9 @@ void GTScene::buildFastModelFromFile(FILE *fp, bool refract, vec3 translation, f
     meshList[i].shineness = 30;
     meshList[i].reflectance = 0.3;
     if (refract) {
-      meshList[i].refract = true;
+      meshList[i].isRefractObject = true;
       meshList[i].refractance = 0.5;
-      meshList[i].refractivity = 1.5;
+      meshList[i].refractiveIndex = 1.5;
     }
     meshList[i].setReference(objectGroup);
   }
@@ -374,7 +342,7 @@ void GTScene::buildBoundaryWithRange(float minx, float maxx, float miny, float m
     box[i].specular = vec3(1.0, 1.0, 1.0);
     box[i].shineness = 40;
     box[i].reflectance = 1.0;
-    box[i].refract = false;
+    box[i].isRefractObject = false;
   }
 
   for (int i = 0; i < 6; i++) {

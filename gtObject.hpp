@@ -49,8 +49,8 @@ public:
   float shineness;
   float reflectance;
 
-  bool refract;
-  float refractivity;
+  bool isRefractObject;
+  float refractiveIndex;
   float refractance;
 
   ~GTModel() { }

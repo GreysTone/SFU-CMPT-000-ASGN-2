@@ -142,10 +142,10 @@ bool GTTriangle::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
 
   float refraction_index;
   if (glm::dot(in, normal) > GTCalc::precision) {
-    refraction_index = 1 / refractivity;
+    refraction_index = 1 / refractiveIndex;
   } else {
     normal = -normal;
-    refraction_index = refractivity;
+    refraction_index = refractiveIndex;
   }
 
   float m = glm::dot(in, normal);
@@ -245,10 +245,10 @@ bool GTSphere::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
 
   float refraction_index;
   if (glm::dot(in, normal) > GTCalc::precision) {
-    refraction_index = 1 / refractivity;
+    refraction_index = 1 / refractiveIndex;
   } else {
     normal = -normal;
-    refraction_index = refractivity;
+    refraction_index = refractiveIndex;
   }
 
   float m = glm::dot(in, normal);
