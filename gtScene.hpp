@@ -22,12 +22,11 @@
 
 using namespace glm;
 
-#define SHOW_PROGRESS
-
 typedef struct match {
   vec3 point;
   float value;
   std::vector<GTModel *>::iterator itor;
+  GTModel *intersectedObject;
 } Match;
 
 class GTScene {
@@ -35,7 +34,7 @@ class GTScene {
 
   void buildModelFromFile(FILE *fp, bool refract, vec3 translation, float scale);
   void buildFastModelFromFile(FILE *fp, bool refract, vec3 translation, float scale);
-  void buildBoundaryWithRange(float minx, float maxx, float miny, float maxy, float minz, float maxz);
+  GTBoundary *buildBoundaryRange(float minx, float maxx, float miny, float maxy, float minz, float maxz);
 public:
   vec3 background_color;
 
@@ -62,6 +61,7 @@ public:
   void buildBonusScene(bool fastbonus, bool refract);
 
   bool intersectScene(vec3 eye, vec3 ray, Match *result, std::vector<GTModel *>::iterator ignore);
+  bool intersectFastScene(vec3 eye, vec3 ray, Match *result, GTModel *ignore);
 };
 
 #endif /* gtScene_hpp */

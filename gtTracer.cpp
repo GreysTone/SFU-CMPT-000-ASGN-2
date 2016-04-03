@@ -64,12 +64,16 @@ void GTTracer::setConfiguration(GTTracerSetting arg) {
 void GTTracer::buildScene() {
   if (userSceneActive) {
     if (bonusRenderActive || fastBonusRenderActive) {
-      scene->buildBonusScene(chessboardActive, refractionActive);
+      scene->buildBonusScene(fastBonusRenderActive, refractionActive);
     } else {
       scene->buildUserScene(chessboardActive, refractionActive);
     }
   }
   else scene->buildDefaultScene(chessboardActive, refractionActive);
+
+  std::cout << "#Objects in Scene: " << scene->modelList.size() << std::endl;
+//  for(int i = 0; i < scene->modelList.size(); i++)
+//    std::cout << i << ".virtual = " << scene->modelList[i]->isVirtual << std::endl;
 }
 
 inline float max(float a, float b) { return a > b ? a : b; }
@@ -117,7 +121,9 @@ void GTTracer::traceRay() {
   {
 #pragma omp for
     for (int i = 0; i < win_height; i++) {
-      std::cout << "render line: " << i + 1 << "/" << win_height << "\n";
+#ifdef SHOW_PROGRESS
+      std::cout << "rendering line: " << i + 1 << "/" << win_height << "\n";
+#endif
 
       vec3 cur_pixel_pos = vec3(curPixelPosX, curPixelPosY + i * y_grid_size, curPixelPosZ);
       for (int j = 0; j < win_width; j++) {
@@ -226,7 +232,76 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::vector
 
   return color;
 }
+vec3 GTTracer::fastPhong(vec3 pointSurf, vec3 vecProject, GTLight light, GTModel *intersectedObject, vec3 ray, int step) {
+  vec3 color;
 
+  vec3 normLight = glm::normalize(light.position - pointSurf);
+  float distance = glm::length(light.position - pointSurf);
+  vec3 &decay = scene->decay;
+  float decayCoefficient = 1 / (decay.x + decay.y * distance + decay.z * distance * distance);
+
+  GTModel *object = intersectedObject;
+
+  vec3 normSurf = glm::normalize(object->getNormal(pointSurf));
+  vec3 vecReflect = (2 * glm::dot(normLight, normSurf) * normSurf) - normLight;
+  vec3 normReflect = glm::normalize(vecReflect);
+  vec3 normProject = glm::normalize(vecProject);
+
+  // shadow
+  if (shadowActive) {
+    float shadowCoefficient = 1.0f;
+    Match matchBox;
+    if (scene->intersectFastScene(pointSurf, normLight, &matchBox, NULL)) shadowCoefficient = 0.0f;
+    decayCoefficient *= shadowCoefficient;
+  }
+
+  // calculate color
+  vec3 Ambient = object->getAmbient(pointSurf) * scene->global_ambient;
+  vec3 Diffuse =
+      decayCoefficient * light.intensity * object->getDiffuse(pointSurf) * max(glm::dot(normLight, normSurf), 0.0f);
+  vec3 Specular = decayCoefficient * light.intensity * object->getSpecular(pointSurf) *
+                  (float) pow(max(glm::dot(normReflect, normProject), 0.0f), object->shineness);
+  color = Ambient + Diffuse + Specular;
+
+  // reflectance
+  if (reflectionActive && step < maxStep) {
+    vec3 reflection = glm::normalize((2 * glm::dot(normProject, normSurf) * normSurf) - normProject);
+    vec3 color_ref = recursive_ray_trace(pointSurf, reflection, light, step + 1);
+    color += color_ref * object->reflectance;
+  }
+
+  // stochastic diffuse
+  if (stochasticActive && step < 2) {
+    for (int i = 0; i < STOCHASTIC_RAY_COUNT; i++) {
+      vec3 axisA = normSurf;
+      vec3 axisB = glm::normalize(glm::cross(normSurf, vecProject));
+
+      // normal distribution
+      std::default_random_engine engine;
+      std::normal_distribution<float> distribute(0.0f, 0.001f);
+
+      vec3 reflection = glm::normalize((2 * glm::dot(normProject, normSurf) * normSurf) - normProject);
+      reflection = glm::rotate(reflection, distribute(engine), axisA);
+      reflection = glm::rotate(reflection, distribute(engine), axisB);
+      reflection = glm::normalize(reflection);
+
+      vec3 color_ref = recursive_ray_trace(pointSurf, reflection, light, step + 1);
+      color += color_ref * (float) (1.0 / STOCHASTIC_RAY_COUNT);
+    }
+  }
+
+  // refraction
+  if (refractionActive && step < maxStep && object->isRefractObject) {
+    vec3 outRay, outPoint;
+    if (object->refracted(ray, pointSurf, &outRay, &outPoint) > GTCalc::precision) {
+      vec3 color_ref = recursive_ray_trace(outPoint, outRay, light, step + 1);
+      color += color_ref * object->refractance;
+    }
+//    else color = vec3(0.0, 0.0, 0.0);
+  }
+
+  return color;
+}
 
 /************************************************************************
  * This is the recursive ray tracer - you need to implement this!
@@ -235,13 +310,25 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::vector
 vec3 GTTracer::recursive_ray_trace(vec3 eye, vec3 ray, GTLight light, int step) {
 
   Match matchBox;
-  if (!(scene->intersectScene(eye, ray, &matchBox, scene->modelList.end()))) {
-    return scene->background_color;
+  if(fastBonusRenderActive) {
+    if (!(scene->intersectFastScene(eye, ray, &matchBox, NULL))) {
+      return scene->background_color;
+    }
+  } else {
+    if (!(scene->intersectScene(eye, ray, &matchBox, scene->modelList.end()))) {
+      return scene->background_color;
+    }
   }
+
 
   vec3 vecView = (eye - matchBox.point);
   vecView = glm::normalize(vecView);
-  return phong(matchBox.point, vecView, light, matchBox.itor, ray, step);
+  if(fastBonusRenderActive) {
+//    std::cout << matchBox.intersectedObject << std::endl;
+    return fastPhong(matchBox.point, vecView, light, matchBox.intersectedObject, ray, step);
+  } else {
+    return phong(matchBox.point, vecView, light, matchBox.itor, ray, step);
+  }
 }
 
 /*********************************************************

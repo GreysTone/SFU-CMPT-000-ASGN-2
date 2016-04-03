@@ -145,7 +145,8 @@ void GTScene::buildBonusScene(bool fastbonus, bool refract) {
     }
     buildModelFromFile(fp2, refract, vec3(0.0f, -1.0f, -5.0f), 5);
     fclose(fp2);
-  } else {  // fast bonus
+  }
+  else {  // fast bonus
     FILE *fp;
     char fname[32];
     strcpy(fname, "chess_pieces/chess_hires.smf");
@@ -201,6 +202,36 @@ bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::vector<GTMo
   *result = minMatch;
 
   if (minMatch.itor == modelList.end()) return false;
+  else return true;
+}
+
+bool GTScene::intersectFastScene(vec3 eye, vec3 ray, Match *result, GTModel *ignore) {
+  // build actual intersect object list
+  std::vector<GTModel *> actualModelList;
+  for(std::vector<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
+    if(!((*it)->isVirtual)) actualModelList.push_back((*it));
+    else (*it)->getIntersectingObject(actualModelList);
+  }
+
+  Match tmpMatch, minMatch;
+  minMatch.itor = actualModelList.end();  // set exit boundary
+  bool setMatch = false;
+  for (std::vector<GTModel *>::iterator it = actualModelList.begin(); it != actualModelList.end(); ++it) {
+    GTModel *object = (*it);
+    if (object == ignore) continue;
+    tmpMatch.value = object->intersect(eye, ray, &(tmpMatch.point), false);
+    tmpMatch.intersectedObject = object;
+    tmpMatch.itor = it;
+    if (tmpMatch.value < GTCalc::precision) continue;
+    if (!setMatch || tmpMatch.value < minMatch.value) {
+      setMatch = true;
+      minMatch = tmpMatch;
+    }
+  }
+
+  *result = minMatch;
+
+  if (minMatch.itor == actualModelList.end()) return false;
   else return true;
 }
 
@@ -298,19 +329,26 @@ void GTScene::buildFastModelFromFile(FILE *fp, bool refract, vec3 translation, f
     }
     meshList[i].setReference(objectGroup);
   }
+//  for (int i = 0; i < mesh_count; i++) {
+//    GTModel *model = &(meshList[i]);
+//    addModel(model);
+//    objectGroup->push_back(model);
+//  }
+  GTBoundary *bound = buildBoundaryRange(minX, maxX, minY, maxY, minZ, maxZ);
   for (int i = 0; i < mesh_count; i++) {
-    GTModel *model = &(meshList[i]);
-    addModel(model);
-    objectGroup->push_back(model);
+    bound->root.addObject(&(meshList[i]));
   }
-//  buildBoundaryWithRange(minX, maxX, minY, maxY, minZ, maxZ);
+  bound->root.splitSpace(OCTTREE_SPLIT_STEP);
+
+  GTModel *model = bound;
+  addModel(model);
 
   if (!ret) std::cout << "release ret\n";
   delete[] vertexList;
   meshListCycle = meshList;
 }
 
-void GTScene::buildBoundaryWithRange(float minx, float maxx, float miny, float maxy, float minz, float maxz) {
+GTBoundary *GTScene::buildBoundaryRange(float minx, float maxx, float miny, float maxy, float minz, float maxz) {
   float xl = maxx - minx;
   float yl = maxy - miny;
   float zl = maxz - minz;
@@ -320,34 +358,33 @@ void GTScene::buildBoundaryWithRange(float minx, float maxx, float miny, float m
   vec3 xaxis(1, 0, 0), yaxis(0, 1, 0), zaxis(0, 0, 1);
   vec3 diffuse(0.7, 0.7, 0.7);
 
-  GTPlane *box = new GTPlane[6];
-  box[0].position = vec3(cx, cy, maxz);
-  box[0].normal = zaxis;
-  box[1].position = vec3(cx, cy, minz);
-  box[1].normal = -zaxis;
-  box[2].position = vec3(maxx, cy, cz);
-  box[2].normal = xaxis;
-  box[3].position = vec3(minx, cy, cz);
-  box[3].normal = -xaxis;
-  box[4].position = vec3(cx, maxy, cz);
-  box[4].normal = yaxis;
-  box[5].position = vec3(cx, miny, cz);
-  box[5].normal = -yaxis;
+//  GTPlane *box = new GTPlane[6];
+  GTBoundary *b = new GTBoundary;
+  b->box[0].position = vec3(cx, cy, maxz);
+  b->box[0].normal = zaxis;
+  b->box[1].position = vec3(cx, cy, minz);
+  b->box[1].normal = -zaxis;
+  b->box[2].position = vec3(maxx, cy, cz);
+  b->box[2].normal = xaxis;
+  b->box[3].position = vec3(minx, cy, cz);
+  b->box[3].normal = -xaxis;
+  b->box[4].position = vec3(cx, maxy, cz);
+  b->box[4].normal = yaxis;
+  b->box[5].position = vec3(cx, miny, cz);
+  b->box[5].normal = -yaxis;
 
   for(int i = 0; i < 6; i++) {
-    box[i].xLength = xl;
-    box[i].yLength = yl;
-    box[i].zLength = zl;
-    box[i].diffuse = diffuse;
-    box[i].specular = vec3(1.0, 1.0, 1.0);
-    box[i].shineness = 40;
-    box[i].reflectance = 1.0;
-    box[i].isRefractObject = false;
+    b->box[i].xLength = xl;
+    b->box[i].yLength = yl;
+    b->box[i].zLength = zl;
+    b->box[i].diffuse = diffuse;
+    b->box[i].specular = vec3(1.0, 1.0, 1.0);
+    b->box[i].shineness = 40;
+    b->box[i].reflectance = 1.0;
+    b->box[i].isRefractObject = false;
   }
+  b->root.setRange(minx, maxx, miny, maxy, minz, maxz);
 
-  for (int i = 0; i < 6; i++) {
-    GTModel *model = &(box[i]);
-    addModel(model);
-  }
+  return b;
 }
 

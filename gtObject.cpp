@@ -19,39 +19,64 @@ void printVector(vec3 v) {
   << "\tLEN:" << length << std::endl;
 }
 
-inline float dot(vec3 v1, vec3 v2) {
+float dot(vec3 v1, vec3 v2) {
   return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
+bool lowerequal(vec3 v1, vec3 v2) {
+  if (v1.x <= v2.x && v1.y <= v2.y && v1.z <= v2.z) return true;
+  else return false;
 }
+
+bool greaterequal(vec3 v1, vec3 v2) {
+  if (v1.x >= v2.x && v1.y >= v2.y && v1.z >= v2.z) return true;
+  else return false;
+}
+
+
+} // namespace GTCalc
 
 vec3 GTModel::getNormal(vec3 surfPoint) {
   vec3 empty = vec3(0.0, 0.0, 0.0);
   return empty;
 }
+
 float GTModel::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
-  return 0;
+  return 1E+126;
 }
+
 vec3 GTModel::getAmbient(vec3 point) {
   return ambient;
 }
+
 vec3 GTModel::getDiffuse(vec3 point) {
   return diffuse;
 }
+
 vec3 GTModel::getSpecular(vec3 point) {
   return specular;
 }
+
 bool GTModel::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
   return false;
 }
+
 float GTModel::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
   return 0;
 }
 
+bool GTModel::isInCubeRange(vec3 min, vec3 max) {
+  return false;
+}
+
+void GTModel::getIntersectingObject(std::vector<GTModel *> &container) {
+  return ;
+}
 
 vec3 GTPlane::getNormal(vec3 surfPoint) {
   return normal;
 }
+
 /*
  * Ray: X = E + t(R)        : Eye, Ray
  * Plane: X * N = P * N     : Normal, Point
@@ -80,6 +105,7 @@ float GTPlane::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
 vec3 GTTriangle::getNormal(vec3 surfPoint) {
   return normal;
 }
+
 float GTTriangle::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   vec3 &E1 = vector[0];
   vec3 &E2 = vector[1];
@@ -99,17 +125,17 @@ float GTTriangle::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   }
 
   // If determinant is near zero, ray lies in plane of triangle
-  if (det < GTCalc::precision)  return -1.0f;
+  if (det < GTCalc::precision) return -1.0f;
 
   // Calculate u and make sure u <= 1
   float u = glm::dot(T, P);
-  if (u < 0.0f || u > det)      return -1.0f;
+  if (u < 0.0f || u > det) return -1.0f;
 
   // Q
   vec3 Q = glm::cross(T, E1);
   // Calculate v and make sure u + v <= 1
   float v = glm::dot(D, Q);
-  if (v < 0.0f || u + v > det)  return -1.0f;
+  if (v < 0.0f || u + v > det) return -1.0f;
 
   // Calculate t, scale parameters, ray intersects triangle
   float t = glm::dot(E2, Q);
@@ -122,6 +148,7 @@ float GTTriangle::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   *hit = (O + t * D);
   return t;
 }
+
 float GTTriangle::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
   vec3 mid, out;
   vec3 endPoint;
@@ -135,6 +162,7 @@ float GTTriangle::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoi
   *outPoint = endPoint;
   return 1.0f;
 }
+
 bool GTTriangle::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
   vec3 normal = getNormal(inPoint);
   vec3 in = glm::normalize(-inRay);
@@ -160,9 +188,11 @@ bool GTTriangle::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
   *outRay = out;
   return true;
 }
+
 void GTTriangle::setReference(std::list<GTModel *> *ref) {
   modelGroup = ref;
 }
+
 float GTTriangle::groupIntersect(vec3 eye, vec3 ray, vec3 *hit) {
   float value, minValue;
   vec3 tmpPoint, minPoint = vec3(0.0, 0.0, 0.0);
@@ -172,9 +202,9 @@ float GTTriangle::groupIntersect(vec3 eye, vec3 ray, vec3 *hit) {
     GTModel *object = (*it);
     value = object->intersect(eye, ray, &(tmpPoint), false);
     tmpIt = it;
-    if(value < GTCalc::precision) continue;
-    if(tmpPoint == eye) continue; //TODO: ignore self, not sure
-    if(!setMatch || value < minValue) {
+    if (value < GTCalc::precision) continue;
+    if (tmpPoint == eye) continue; //TODO: ignore self, not sure
+    if (!setMatch || value < minValue) {
       setMatch = true;
       minValue = value;
       minPoint = tmpPoint;
@@ -183,14 +213,23 @@ float GTTriangle::groupIntersect(vec3 eye, vec3 ray, vec3 *hit) {
   }
 
   *hit = minPoint;
-  if(minIt == modelGroup->end()) return false;
+  if (minIt == modelGroup->end()) return false;
   else return true;
+}
+
+bool GTTriangle::isInCubeRange(vec3 min, vec3 max) {
+  for(int i = 0; i < 3; i++) {
+    if (GTCalc::lowerequal(vertex[i], max) && GTCalc::greaterequal(vertex[i], min))
+      return true;
+  }
+  return false;
 }
 
 
 vec3 GTSphere::getNormal(vec3 surfPoint) {
   return glm::normalize(surfPoint - this->position);
 }
+
 /**********************************************************************
  * This function intersects a ray with a given sphere 'sph'. You should
  * use the parametric representation of a line and do the intersection.
@@ -238,6 +277,7 @@ float GTSphere::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
     }
   }
 }
+
 bool GTSphere::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
   vec3 normal = getNormal(inPoint);
   vec3 in = glm::normalize(-inRay);
@@ -269,6 +309,7 @@ bool GTSphere::refractRay(vec3 inRay, vec3 inPoint, vec3 *outRay) {
 //  *outRay = normal * ( refraction_index * glm::dot(normal,in) - sqrt(root) ) - refraction_index * in;
 //  return true;
 }
+
 float GTSphere::refracted(vec3 inRay, vec3 inPoint, vec3 *outRay, vec3 *outPoint) {
   vec3 mid, out;
   vec3 endPoint;
@@ -293,6 +334,7 @@ vec3 GTChessBoard::getAmbient(vec3 point) {
   else
     return vec3(1.0, 1.0, 1.0);
 }
+
 vec3 GTChessBoard::getDiffuse(vec3 point) {
   vec3 range = point - position;
   int x = (int) floor(glm::dot(range, vec3(1, 0, 0)));
@@ -302,6 +344,7 @@ vec3 GTChessBoard::getDiffuse(vec3 point) {
   else
     return vec3(1.0, 1.0, 1.0);
 }
+
 vec3 GTChessBoard::getSpecular(vec3 point) {
   vec3 range = point - position;
   int x = (int) floor(glm::dot(range, vec3(1, 0, 0)));
@@ -311,6 +354,7 @@ vec3 GTChessBoard::getSpecular(vec3 point) {
   else
     return vec3(1.0, 1.0, 1.0);
 }
+
 float GTChessBoard::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   float Right = glm::dot((position - eye), normal);
   float Left = glm::dot(ray, normal);
@@ -328,5 +372,100 @@ float GTChessBoard::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
   *hit = point;
   return t;
 }
+
+
+
+void GTBoundary::getIntersectingObject(std::vector<GTModel *> &container) {
+//  std::cout << "Hi Getting \n";
+}
+
+
+GTOctTree::GTOctTree() {
+  isLeaf = true;
+  space = NULL;
+  xmin = xmax = ymin = ymax = zmin = zmax = 0;
+}
+
+GTOctTree::~GTOctTree() {
+  if (space) delete[] space;
+  for (std::vector<GTModel *>::iterator it; it != content.end(); it++) {
+    delete (*it);
+  }
+  space = NULL;
+}
+
+void GTOctTree::setRange(float xi, float xa, float yi, float ya, float zi, float za) {
+  xmin = xi;
+  xmax = xa;
+  ymin = yi;
+  ymax = ya;
+  zmin = zi;
+  zmax = za;
+  cubeMin = vec3(xi, yi, zi);
+  cubeMax = vec3(xa, ya, za);
+}
+
+void GTOctTree::splitSpace(int step) {
+  if(step < 1) return;
+  space = new GTOctTree[8];
+  isLeaf = false;
+
+  float xmid = (xmin + xmax) / 2;
+  float ymid = (ymin + ymax) / 2;
+  float zmid = (zmin + zmax) / 2;
+#ifdef OCT_OUTPUT
+  std::cout << "(" << step << ")new split on X: " << xmid << std::endl;
+  std::cout << "(" << step << ")new split on Y: " << ymid << std::endl;
+  std::cout << "(" << step << ")new split on Z: " << zmid << std::endl;
+#endif
+
+  space[0].setRange(xmin, xmid, ymin, ymid, zmin, zmid);
+  space[1].setRange(xmin, xmid, ymin, ymid, zmid, zmax);
+  space[2].setRange(xmin, xmid, ymid, ymax, zmin, zmid);
+  space[3].setRange(xmin, xmid, ymid, ymax, zmid, zmax);
+  space[4].setRange(xmid, xmax, ymin, ymid, zmin, zmid);
+  space[5].setRange(xmid, xmax, ymin, ymid, zmid, zmax);
+  space[6].setRange(xmid, xmax, ymid, ymax, zmin, zmid);
+  space[7].setRange(xmid, xmax, ymid, ymax, zmid, zmax);
+
+  for (std::vector<GTModel *>::iterator it = content.begin(); it != content.end(); ++it) {
+    for (int i = 0; i < 8; i++) {
+      if (((*it)->isInCubeRange(space[i].cubeMin, space[i].cubeMax)))
+      {
+        space[i].content.push_back((*it));
+      }
+    }
+  }
+#ifdef OCT_OUTPUT
+  std::cout << "transfer " << content.size() << " node(s) into sub space\n";
+#endif
+  content.clear();
+
+  // recursive split space
+  for(int i = 0; i < 8; i++) {
+#ifdef OCT_OUTPUT
+    std::cout << "  " << space[i].content.size() << " node(s) in tree with index: " << i << std::endl;
+#endif
+    space[i].splitSpace(step - 1);
+  }
+}
+
+void GTOctTree::addObject(GTModel *obj) {
+  content.push_back(obj);
+}
+
+bool GTOctTree::isInRange(vec3 point) {
+//  if(pos.x >= xmin && pos.x <= xmax &&
+//      pos.y >= ymin && pos.y <= ymax &&
+//      pos.z <= zmin && pos.y <= zmin)
+//    return true;
+//  else return false;
+  vec3 min = vec3(xmin, ymin, zmin);
+  vec3 max = vec3(xmax, ymax, zmax);
+  if (GTCalc::lowerequal(point, max) && GTCalc::greaterequal(point, min))
+    return true;
+  else return false;
+}
+
 
 

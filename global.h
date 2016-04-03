@@ -4,3 +4,7 @@
 #define IMAGE_WIDTH 5.0
 
 #define STOCHASTIC_RAY_COUNT 5
+#define OCTTREE_SPLIT_STEP 1
+
+#define OCT_OUTPUT
+//#define SHOW_PROGRESS
