@@ -51,7 +51,7 @@ class GTTracer {
 
   GTScene *scene;
 
-  vec3 phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<GTModel *>::iterator model, vec3 ray, int step);
+  vec3 phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::vector<GTModel *>::iterator model, vec3 ray, int step);
   vec3 recursive_ray_trace(vec3 eye, vec3 ray, GTLight light, int step);
 public:
   int win_width;

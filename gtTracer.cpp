@@ -154,7 +154,7 @@ void GTTracer::traceRay() {
 /*********************************************************************
  * Phong illumination
  *********************************************************************/
-vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<GTModel *>::iterator model, vec3 ray, int step) {
+vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::vector<GTModel *>::iterator model, vec3 ray, int step) {
   vec3 color;
 
   vec3 normLight = glm::normalize(light.position - pointSurf);
@@ -207,7 +207,6 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::list<G
       reflection = glm::normalize(reflection);
 
       vec3 color_ref = recursive_ray_trace(pointSurf, reflection, light, step + 1);
-      // TODO: unknown argument
       color += color_ref * (float)(1.0 / STOCHASTIC_RAY_COUNT);
     }
   }

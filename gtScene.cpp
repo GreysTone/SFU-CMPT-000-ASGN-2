@@ -16,7 +16,7 @@ GTScene::GTScene() {
 
 GTScene::~GTScene() {
   //TODO: release vector
-  for (std::list<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
+  for (std::vector<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
     delete (*it);
   }
   delete[] meshListCycle;
@@ -182,11 +182,12 @@ void GTScene::buildBonusScene(bool fastbonus, bool refract) {
  * which arguments to use for the function. For example, note that you
  * should return the point of intersection to the calling function.
  **********************************************************************/
-bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTModel *>::iterator ignore) {
+bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::vector<GTModel *>::iterator ignore) {
   Match tmpMatch, minMatch;
   minMatch.itor = modelList.end();  // set exit boundary
+  minMatch.it = (int)modelList.size();
   bool setMatch = false;
-  for (std::list<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
+  for (std::vector<GTModel *>::iterator it = modelList.begin(); it != modelList.end(); ++it) {
     if (it == ignore) continue;
     GTModel *object = (*it);
     tmpMatch.value = object->intersect(eye, ray, &(tmpMatch.point), false);
@@ -198,9 +199,31 @@ bool GTScene::intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTMode
     }
   }
 
+  // ******** parallel multi-cores accelerate
+
+//  Match *matchBox = new Match[modelList.size()];
+//#pragma omp parallel for shared(matchBox)
+//    for (int it = 0; it < (int)modelList.size(); ++it) {
+//      if (modelList[it] == (*ignore)) continue;
+//      GTModel *object = (modelList[it]);
+//      matchBox[it].value = object->intersect(eye, ray, &(matchBox[it].point), false);
+//      matchBox[it].it = it;
+//      matchBox[it].itor = std::find(modelList.begin(), modelList.end(), object);
+//  }
+//
+//  for(int i = 0; i < (int)modelList.size(); i++) {
+//      if((!setMatch || matchBox[i].value < minMatch.value) && matchBox[i].value > -GTCalc::precision) {
+//        minMatch = matchBox[i];
+//      }
+//  }
+//
+//  delete[] matchBox;
+
+  // ********
+
   *result = minMatch;
 
-  if (minMatch.itor == modelList.end()) return false;
+  if (minMatch.it == (int)modelList.size()) return false;
   else return true;
 }
 

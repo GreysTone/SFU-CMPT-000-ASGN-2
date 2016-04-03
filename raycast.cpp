@@ -26,6 +26,8 @@
 
 #include <iostream>
 #include <string.h>
+// multi-core header
+#include <omp.h>
 
 #include "global.h"
 #include "include/shader.h"

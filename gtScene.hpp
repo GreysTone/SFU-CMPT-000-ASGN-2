@@ -17,6 +17,8 @@
 #include "include/glm/gtc/type_ptr.hpp"
 #include "gtObject.hpp"
 #include "global.h"
+#include <omp.h>
+#include <algorithm>
 
 using namespace glm;
 
@@ -25,7 +27,8 @@ using namespace glm;
 typedef struct match {
   vec3 point;
   float value;
-  std::list<GTModel *>::iterator itor;
+  int it;
+  std::vector<GTModel *>::iterator itor;
 } Match;
 
 class GTScene {
@@ -44,7 +47,7 @@ public:
   vec3 decay;
 
   std::list<GTLight> lightList;
-  std::list<GTModel *> modelList;
+  std::vector<GTModel *> modelList;
 
   GTTriangle *meshListCycle;
 
@@ -59,7 +62,7 @@ public:
   void buildDefaultScene(bool chessboard, bool refract);
   void buildBonusScene(bool fastbonus, bool refract);
 
-  bool intersectScene(vec3 eye, vec3 ray, Match *result, std::list<GTModel *>::iterator ignore);
+  bool intersectScene(vec3 eye, vec3 ray, Match *result, std::vector<GTModel *>::iterator ignore);
 };
 
 #endif /* gtScene_hpp */
