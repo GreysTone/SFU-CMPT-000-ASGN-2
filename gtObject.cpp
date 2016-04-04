@@ -375,88 +375,105 @@ float GTChessBoard::intersect(vec3 eye, vec3 ray, vec3 *hit, bool far) {
 
 
 void GTBoundary::getIntersectingObject(vec3 eye, vec3 ray, std::vector<GTModel *> *container) {
-//  std::cout << "Hi Getting \n";
-  // 1 get tracing point list
-//  std::map<vec3, float> hitSerial;
+  // InBox & OutBox Point;
   std::vector<vec3> hitSerial;
   std::map<int, float> hitFaceContainer;
   for (int i = 0; i < 6; i++) {
     vec3 hit;
     float t = box[i].intersect(eye, ray, &hit, 0);
-    if (t > GTCalc::precision)
+    if (t > GTCalc::precision) {
       hitFaceContainer.insert(std::pair<int, float>(i, t));
-  }
-
-  std::map<int, float> &hFC = hitFaceContainer;
-  if (hFC.empty()) return;
-  for (std::map<int, float>::iterator it = hFC.begin(); it != hFC.end(); it++) {
-    vec3 normal = box[it->first].normal;
-    // z-axis
-    if (normal == vec3(0, 0, 1) || normal == vec3(0, 0, -1)) {
-      float t = it->second;
-      int block = pow(2, OCTTREE_SPLIT_STEP);
-      float interval = (root.zmax - root.zmin) / block;
-      vec3 nD = glm::normalize(ray);
-//        vec3 inter = (normal == vec3(0, 0, 1))?vec3(0, 0, root.zmin):vec3(0, 0, root.zmax);
-      for (int i = 0; i <= block; i++) {
-//          if(normal == vec3(0,0,1)) inter += vec3(0, 0, i * interval);
-//          else  inter += vec3(0, 0, -i * interval);
-        vec3 inter = vec3(0, 0, root.zmin + i * interval);
-        float offset = -(glm::dot(inter, normal) / glm::dot(nD, normal));
-        vec3 newPoint = eye + (t + offset) * nD;
-        if (root.isInRange(newPoint))
-//          hitSerial.insert(std::pair<vec3, float>(newPoint, (t + offset)));
-          hitSerial.push_back(newPoint);
-      }
-    }
-    // x-axis
-    if (normal == vec3(1, 0, 0) || normal == vec3(-1, 0, 0)) {
-      float t = it->second;
-      int block = pow(2, OCTTREE_SPLIT_STEP);
-      float interval = (root.xmax - root.xmin) / block;
-      vec3 nD = glm::normalize(ray);
-      for (int i = 0; i <= block; i++) {
-        vec3 inter = vec3(root.xmin + i * interval, 0, 0);
-        float offset = -(glm::dot(inter, normal) / glm::dot(nD, normal));
-        vec3 newPoint = eye + (t + offset) * nD;
-        if (root.isInRange(newPoint))
-          hitSerial.push_back(newPoint);
-      }
-    }
-    // y-axis
-    if (normal == vec3(0, 1, 0) || normal == vec3(0, -1, 0)) {
-      float t = it->second;
-      int block = pow(2, OCTTREE_SPLIT_STEP);
-      float interval = (root.ymax - root.ymin) / block;
-      vec3 nD = glm::normalize(ray);
-      for (int i = 0; i <= block; i++) {
-        vec3 inter = vec3(0, root.ymin + i * interval, 0);
-        float offset = -(glm::dot(inter, normal) / glm::dot(nD, normal));
-        vec3 newPoint = eye + (t + offset) * nD;
-        if (root.isInRange(newPoint))
-          hitSerial.push_back(newPoint);
-      }
+      hitSerial.push_back(hit);
     }
   }
 
-  //TODO: may there is a problem
+  if(hitSerial.empty()) return ;
+  vec3 midPoint = hitSerial[1] - hitSerial[0];
+  midPoint *= 0.5;
+  midPoint += hitSerial[0];
+
+  // Only consider the first OCT space structure
+  for (int i = 0; i < 8; i++) {
+    if (root.space[i].containPoint(hitSerial[0])
+        || root.space[i].containPoint(midPoint)
+        || root.space[i].containPoint(hitSerial[1])) {
+      for (int j = 0; j < (int) root.space[i].content.size(); j++)
+        container->push_back(root.space[i].content[j]);
+    }
+  }
+
+  //TODO: this routine contains a problem
+  /*
+//  std::map<int, float> &hFC = hitFaceContainer;
+//  if (hFC.empty()) return;
+//  for (std::map<int, float>::iterator it = hFC.begin(); it != hFC.end(); it++) {
+//    vec3 normal = box[it->first].normal;
+//    // z-axis
+//    if (normal == vec3(0, 0, 1) || normal == vec3(0, 0, -1)) {
+//      float t = it->second;
+//      int block = pow(2, OCTTREE_SPLIT_STEP);
+//      float interval = (root.zmax - root.zmin) / block;
+//      vec3 nD = glm::normalize(ray);
+////        vec3 inter = (normal == vec3(0, 0, 1))?vec3(0, 0, root.zmin):vec3(0, 0, root.zmax);
+//      for (int i = 0; i <= block; i++) {
+////          if(normal == vec3(0,0,1)) inter += vec3(0, 0, i * interval);
+////          else  inter += vec3(0, 0, -i * interval);
+//        vec3 inter = vec3(0, 0, root.zmin + i * interval);
+//        float offset = -(glm::dot(inter, normal) / glm::dot(nD, normal));
+//        vec3 newPoint = eye + (t + offset) * nD;
+//        if (root.isInRange(newPoint))
+////          hitSerial.insert(std::pair<vec3, float>(newPoint, (t + offset)));
+//          hitSerial.push_back(newPoint);
+//      }
+//    }
+//    // x-axis
+//    if (normal == vec3(1, 0, 0) || normal == vec3(-1, 0, 0)) {
+//      float t = it->second;
+//      int block = pow(2, OCTTREE_SPLIT_STEP);
+//      float interval = (root.xmax - root.xmin) / block;
+//      vec3 nD = glm::normalize(ray);
+//      for (int i = 0; i <= block; i++) {
+//        vec3 inter = vec3(root.xmin + i * interval, 0, 0);
+//        float offset = -(glm::dot(inter, normal) / glm::dot(nD, normal));
+//        vec3 newPoint = eye + (t + offset) * nD;
+//        if (root.isInRange(newPoint))
+//          hitSerial.push_back(newPoint);
+//      }
+//    }
+//    // y-axis
+//    if (normal == vec3(0, 1, 0) || normal == vec3(0, -1, 0)) {
+//      float t = it->second;
+//      int block = pow(2, OCTTREE_SPLIT_STEP);
+//      float interval = (root.ymax - root.ymin) / block;
+//      vec3 nD = glm::normalize(ray);
+//      for (int i = 0; i <= block; i++) {
+//        vec3 inter = vec3(0, root.ymin + i * interval, 0);
+//        float offset = -(glm::dot(inter, normal) / glm::dot(nD, normal));
+//        vec3 newPoint = eye + (t + offset) * nD;
+//        if (root.isInRange(newPoint))
+//          hitSerial.push_back(newPoint);
+//      }
+//    }
+//  }
+
 //  if(hitSerial.size() > 1)
 //    std::cout << hitSerial.size() << std::endl;
 
-  // 2 locate tree
-  // 3 adding object to container
-  for(std::vector<vec3>::iterator it = hitSerial.begin(); it != hitSerial.end(); ++it)
-  {
-    GTOctTree *subTree = locateTree(&root, (*it));
-    for (int i = 0; i < (int)subTree->content.size(); i++)
-      container->push_back(subTree->content[i]);
-  }
+// 2 locate tree
+// 3 adding object to container
+//  for(std::vector<vec3>::iterator it = hitSerial.begin(); it != hitSerial.end(); ++it)
+//  {
+//    GTOctTree *subTree = locateTree(&root, (*it));
+//    for (int i = 0; i < (int)subTree->content.size(); i++)
+//      container->push_back(subTree->content[i]);
+//  }
+*/
 }
 
 GTOctTree *GTBoundary::locateTree(GTOctTree *tree, vec3 position) {
-  if(tree->isLeaf) return tree;
-  for(int i = 0; i < 8; i++) {
-    if(tree->space[i].isInRange(position))
+  if (tree->isLeaf) return tree;
+  for (int i = 0; i < 8; i++) {
+    if (tree->space[i].containPoint(position))
       return locateTree(&(tree->space[i]), position);
   }
   return NULL;
@@ -513,7 +530,8 @@ void GTOctTree::splitSpace(int step) {
 
   for (std::vector<GTModel *>::iterator it = content.begin(); it != content.end(); ++it) {
     for (int i = 0; i < 8; i++) {
-      if (((*it)->isInCubeRange(space[i].cubeMin, space[i].cubeMax))) {
+      vec3 loose = vec3(0.1, 0.1, 0.1);
+      if (((*it)->isInCubeRange(space[i].cubeMin-loose, space[i].cubeMax+loose))) {
         space[i].content.push_back((*it));
       }
     }
@@ -521,7 +539,9 @@ void GTOctTree::splitSpace(int step) {
 #ifdef OCT_OUTPUT
   std::cout << "transfer " << content.size() << " node(s) into sub space\n";
 #endif
+#ifdef OCT_REDUCE_MEM
   content.clear();
+#endif
 
   // recursive split space
   for (int i = 0; i < 8; i++) {
@@ -536,12 +556,7 @@ void GTOctTree::addObject(GTModel *obj) {
   content.push_back(obj);
 }
 
-bool GTOctTree::isInRange(vec3 point) {
-//  if(pos.x >= xmin && pos.x <= xmax &&
-//      pos.y >= ymin && pos.y <= ymax &&
-//      pos.z <= zmin && pos.y <= zmin)
-//    return true;
-//  else return false;
+bool GTOctTree::containPoint(vec3 point) {
   vec3 min = vec3(xmin, ymin, zmin);
   vec3 max = vec3(xmax, ymax, zmax);
   if (GTCalc::lowerequal(point, max) && GTCalc::greaterequal(point, min))

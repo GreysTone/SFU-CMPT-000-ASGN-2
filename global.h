@@ -7,4 +7,7 @@
 #define OCTTREE_SPLIT_STEP 1
 
 #define OCT_OUTPUT
-//#define SHOW_PROGRESS
+//#define OCT_REDUCE_MEM
+#define SHOW_PROGRESS
+
+#define GT_PARALLEL

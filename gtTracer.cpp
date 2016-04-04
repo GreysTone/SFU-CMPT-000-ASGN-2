@@ -116,10 +116,13 @@ void GTTracer::traceRay() {
       vec3(-0.25f, -0.25f, 0.0f),
       vec3(0.25f, -0.25f, 0.0f)
   };
-
+#ifdef GT_PARALLEL
 #pragma omp parallel
+#endif
   {
+#ifdef GT_PARALLEL
 #pragma omp for
+#endif
     for (int i = 0; i < win_height; i++) {
 #ifdef SHOW_PROGRESS
       std::cout << "rendering line: " << i + 1 << "/" << win_height << "\n";
@@ -216,7 +219,7 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::vector
       reflection = glm::normalize(reflection);
 
       vec3 color_ref = recursive_ray_trace(pointSurf, reflection, light, step + 1);
-      color += color_ref * (float) (1.0 / STOCHASTIC_RAY_COUNT);
+      color += color_ref * object->reflectance * (float) (1.0 / STOCHASTIC_RAY_COUNT);
     }
   }
 
@@ -225,7 +228,7 @@ vec3 GTTracer::phong(vec3 pointSurf, vec3 vecProject, GTLight light, std::vector
     vec3 outRay, outPoint;
     if (object->refracted(ray, pointSurf, &outRay, &outPoint) > GTCalc::precision) {
       vec3 color_ref = recursive_ray_trace(outPoint, outRay, light, step + 1);
-      color += color_ref * object->refractance;
+      color += color_ref * object->transmissivity;
     }
 //    else color = vec3(0.0, 0.0, 0.0);
   }
@@ -295,7 +298,7 @@ vec3 GTTracer::fastPhong(vec3 pointSurf, vec3 vecProject, GTLight light, GTModel
     vec3 outRay, outPoint;
     if (object->refracted(ray, pointSurf, &outRay, &outPoint) > GTCalc::precision) {
       vec3 color_ref = recursive_ray_trace(outPoint, outRay, light, step + 1);
-      color += color_ref * object->refractance;
+      color += color_ref * object->transmissivity;
     }
 //    else color = vec3(0.0, 0.0, 0.0);
   }

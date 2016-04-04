@@ -56,7 +56,7 @@ void GTScene::buildDefaultScene(bool chessboard, bool refract) {
   sphere[0].reflectance = 0.4;
   if (refract) {
     sphere[0].isRefractObject = true;
-    sphere[0].refractance = 1.0;
+    sphere[0].transmissivity = 1.0;
     sphere[0].refractiveIndex = 1.5;
   }
   // sphere 2
@@ -69,7 +69,7 @@ void GTScene::buildDefaultScene(bool chessboard, bool refract) {
   sphere[1].reflectance = 0.3;
   if (refract) {
     sphere[1].isRefractObject = true;
-    sphere[1].refractance = 1.0;
+    sphere[1].transmissivity = 1.0;
     sphere[1].refractiveIndex = 2.0;
   }
   // sphere 3
@@ -82,7 +82,7 @@ void GTScene::buildDefaultScene(bool chessboard, bool refract) {
   sphere[2].reflectance = 0.3;
   if (refract) {
     sphere[2].isRefractObject = true;
-    sphere[2].refractance = 0.5;
+    sphere[2].transmissivity = 0.5;
     sphere[2].refractiveIndex = 1.5;
   }
   for (int i = 0; i < 3; i++) {
@@ -268,7 +268,7 @@ void GTScene::buildModelFromFile(FILE *fp, bool refract, vec3 translation, float
     meshList[i].reflectance = 0.3;
     if (refract) {
       meshList[i].isRefractObject = true;
-      meshList[i].refractance = 0.5;
+      meshList[i].transmissivity = 0.5;
       meshList[i].refractiveIndex = 1.5;
     }
     meshList[i].setReference(objectGroup);
@@ -324,7 +324,7 @@ void GTScene::buildFastModelFromFile(FILE *fp, bool refract, vec3 translation, f
     meshList[i].reflectance = 0.3;
     if (refract) {
       meshList[i].isRefractObject = true;
-      meshList[i].refractance = 0.5;
+      meshList[i].transmissivity = 0.5;
       meshList[i].refractiveIndex = 1.5;
     }
     meshList[i].setReference(objectGroup);
@@ -384,6 +384,9 @@ GTBoundary *GTScene::buildBoundaryRange(float minx, float maxx, float miny, floa
     b->box[i].isRefractObject = false;
   }
   b->root.setRange(minx, maxx, miny, maxy, minz, maxz);
+
+//  for(int i = 2; i < 4; i++)
+//    addModel(&(b->box[i]));
 
   return b;
 }

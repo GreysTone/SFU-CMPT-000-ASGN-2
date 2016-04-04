@@ -254,7 +254,7 @@ int main(int argc, char **argv) {
   }
   if (strcmp(argv[1], "fbonus") == 0) {
 //      options = USER_SCENE | SHADOW | REFLECTION | CHESSBOARD | REFRACTION | STOCHASTIC_DIFFUSE | ANTIALIAS;
-    options = USER_SCENE  | CHESSBOARD ;
+    options = USER_SCENE | SHADOW | REFLECTION | CHESSBOARD | REFRACTION | STOCHASTIC_DIFFUSE | ANTIALIAS;
     options |= FAST_BONUS;
   }
 

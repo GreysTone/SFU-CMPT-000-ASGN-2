@@ -58,7 +58,7 @@ public:
   float reflectance;
   bool isRefractObject;
   float refractiveIndex;
-  float refractance;
+  float transmissivity;
 
   bool isVirtual;
   bool isAccelerated;
@@ -171,7 +171,7 @@ public:
 
   void setRange(float xi, float xa, float yi, float ya, float zi, float za);
 
-  bool isInRange(vec3 point);
+  bool containPoint(vec3 point);
 
   void addObject(GTModel *obj);
 
