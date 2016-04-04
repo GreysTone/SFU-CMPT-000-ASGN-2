@@ -34,69 +34,11 @@
 
 #include "gtTracer.hpp"
 
-//#include "trace.h"
-//#include "sphere.h"
-//#include "image_util.h"
-//#include "scene.h"
-
-//
-// Global variables
-//
-// Here we avoid dynamic memory allocation as a convenience. You can
-// change the resolution of your rendered image by changing the values
-// of WIN_X_SIZE and WIN_Y_SIZE in "global.h", along with other
-// global variables
-//
-//
-//int win_width = WIN_WIDTH;
-//int win_height = WIN_HEIGHT;
-
-//GLfloat frame[WIN_HEIGHT][WIN_WIDTH][3];
-// array for the final image
-// This gets displayed in glut window via texture mapping,
-// you can also save a copy as bitmap by pressing 's'
-//
-//float image_width = IMAGE_WIDTH;
-//float image_height = (float(WIN_HEIGHT) / float(WIN_WIDTH)) * IMAGE_WIDTH;
-
-// some colors
-//RGB_float background_clr; // background color
-//RGB_float null_clr = {0.0, 0.0, 0.0};   // NULL color
-
-//
-// these view parameters should be fixed
-//
-//Point eye_pos = {0.0, 0.0, 0.0};  // eye position
-//float image_plane = -1.5;           // image plane position
-
-// list of spheres in the scene
-//Spheres *scene = NULL;
-
-// light 1 position and color
-//Point light1;
-//float light1_intensity[3];
-
-// global ambient term
-//float global_ambient[3];
-
-// light decay parameters
-//float decay_a;
-//float decay_b;
-//float decay_c;
-
-// maximum level of recursions; you can use to control whether reflection
-// is implemented and for how many levels
-//int step_max = 1;
-
-// You can put your flags here
-// a flag to indicate whether you want to have shadows
-//int shadow_on = 0;
 
 
 // OpenGL
 const int NumPoints = 6;
 
-//gtArgument *ArgumentHandler = NULL;
 GTTracer *tracer = NULL;
 //----------------------------------------------------------------------------
 
@@ -238,7 +180,7 @@ int main(int argc, char **argv) {
 
   if (argc < 3) {
     std::cout << "Missing arguments ... use:\n";
-    std::cout << "./raycast [-u | -d] step_max <options>\n";
+    std::cout << "./raycast [-u | -d | bonus | fbonus] step_max <options>\n";
     return false;
   }
 

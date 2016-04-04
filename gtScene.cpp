@@ -155,7 +155,7 @@ void GTScene::buildBonusScene(bool fastbonus, bool refract) {
       printf("Unable to open file '%s'\n", fname);
       return;
     }
-    buildFastModelFromFile(fp, refract, vec3(0.0f, -1.0f, -5.5f), 3);
+    buildFastModelFromFile(fp, refract, vec3(0.0f, -1.5f, -5.5f), 3);
     fclose(fp);
   }
 
