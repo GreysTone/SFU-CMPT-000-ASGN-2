@@ -18,21 +18,21 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 * Linux (**tested on Ubuntu 14.04.03 LTS in VMware 8**)
     * Dependency: glew, freeglut3, mesa (possibly others needed)
     * In an initial environment
-        * make && ./raycast [-u | -d | **bonus** | **fbonus**] step_max
+        * make && ./raychess [-u | -d | **bonus** | **fbonus**] step_max
     * Otherwise
         * make clean
-        * make && ./raycast [-u | -d | **bonus** | **fbonus**] step_max <options>
+        * make && ./raychess [-u | -d | **bonus** | **fbonus**] step_max <options>
 
 ## Preview
-* Default Scene (./raycast -d 5)
+* Default Scene (./raychess -d 5)
 
   <img src="default.bmp" />
 
-* All Options Scene (./raycast -u 5 +s +l +r +f +c +p)
+* All Options Scene (./raychess -u 5 +s +l +r +f +c +p)
 
   <img src="mine.bmp" />
 
-* Bonus(Accelerated) Scene (./raycast fbonus 5)
+* Bonus(Accelerated) Scene (./raychess fbonus 5)
 
   <img src="chess_scene.bmp" />
 
@@ -63,8 +63,8 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 
 ## Options Description
 * render bonus part using:
-      ./raycast bonus step_max      # normal bonus rendering
-      ./raycast fbonus step_max     # active all accelerations
+      ./raychess bonus step_max      # normal bonus rendering
+      ./raychess fbonus step_max     # active all accelerations
 * Since I open the parallel features, the statistic number of intersection is ignored, while there is also an approximate number in **profiling report** (shown as below).
 * **'bonus'** or **'fbonus'** will automatically tigger *shadow*, *refraction*, *recursive reflection*, *chessboard*, *stochastic diffuse* and *antialias*
 

@@ -28,7 +28,7 @@ CC= g++
 CFLAGS= -O3 -std=c++0x -g -Wall -pedantic -DGL_GLEXT_PROTOTYPES -pg -fopenmp
 
 # The name of the final executable
-EXECUTABLE= raycast
+EXECUTABLE= raychess
 
 # The basic library we are using add the other libraries you want to link
 # to your program here
