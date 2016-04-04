@@ -18,10 +18,10 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 * Linux (**tested on Ubuntu 14.04.03 LTS in VMware 8**)
     * Dependency: glew, freeglut3, mesa (possibly others needed)
     * In an initial environment
-        * make && ./raycast [-u | -d | bonus | fbonus] step_max
+        * make && ./raycast [-u | -d | **bonus** | **fbonus**] step_max
     * Otherwise
         * make clean
-        * make && ./raycast [-u | -d | bonus | fbonus] step_max <options>
+        * make && ./raycast [-u | -d | **bonus** | **fbonus**] step_max <options>
 
 ## Preview
 * Default Scene (./raycast -d 5)
@@ -34,7 +34,7 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 
 * Bonus(Accelerated) Scene (./raycast fbonus 5)
 
-  <img src="bonus.bmp" />
+  <img src="chess_scene.bmp" />
 
 ## Acceleration in Bonus Implementation
 * Speed compare (option 'bonus 5' & 'fbonus 5')
@@ -43,9 +43,13 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 
 
 * **Parallel programming** with *OpenMP*
+  * Using *OpenMP* for multi-threads processing the scene, in tested machine, it open 4 threads processing the whole image. Each threads takes one-forth workloads.
 * **Object Boundary Box** accelerations
+  * The virtual object **GT_Boundary** is load into the scene, it bound the chess, and implement the interface for intersection and refraction. Internally, it contains an OctTree.
 * A simple **OctTree** implementation
+  * A simple OctTree separates the boundary box into 8 sub-area, in order to reduce the number of triangle meshes during the intersection.
 * **Object Internal** intersection in refraction
+  * Also, the refraction process only considers about the whole object itself, thus this reduce calculation between the ray and others.
 
 ## Features
 * ***Parallel*** (with **'-fopenmp'** compile option)
@@ -55,6 +59,7 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 * Using **Normal Distribution** in stochastic diffuse
 * **'-g'** compile option for debugging
 * **'-pg'** compile option for profiling
+* **Polymorphism**
 
 ## Options Description
 * render bonus part using:
