@@ -24,13 +24,16 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
         * make && ./raycast [-u | -d | bonus | fbonus] step_max <options>
 
 ## Preview
-* Default Scene (./raycast -d 5 )
+* Default Scene (./raycast -d 5)
+
   <img src="default.bmp" />
 
 * All Options Scene (./raycast -u 5 +s +l +r +f +c +p)
+
   <img src="mine.bmp" />
 
 * Bonus(Accelerated) Scene (./raycast fbonus 5)
+
   <img src="bonus.bmp" />
 
 ## Acceleration in Bonus Implementation
@@ -71,8 +74,7 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
   * **OCT_OUTPUT**, showing OctTree's basic information
   * **OCT_REDUCE_MEM**, reducing the cost of memory of building OctTree
   * **SHOW_PROGRESS**, showing the progress on different threads
-
-  #define GT_PARALLEL
+  * **GT_PARALLEL**, enabling parallel features
 
 
 ## Some Comments
