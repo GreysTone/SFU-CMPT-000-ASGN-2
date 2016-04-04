@@ -3,7 +3,6 @@
 *.vs
 *.DS_Store
 *.o
-*.bmp
 *.smf#
 
 core

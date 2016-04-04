@@ -17,7 +17,7 @@ INCLUDEDIR=/usr/include/
 LIBDIR=/usr/lib
 
 # If you have more source files add them here 
-SOURCE= sphere.cpp vector.cpp raycast.cpp include/InitShader.cpp gtObject.cpp gtScene.cpp gtTracer.cpp
+SOURCE= raycast.cpp include/InitShader.cpp gtObject.cpp gtScene.cpp gtTracer.cpp
 
 # The compiler we are using 
 CC= g++
