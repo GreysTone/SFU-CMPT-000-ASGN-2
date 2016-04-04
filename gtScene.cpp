@@ -147,29 +147,16 @@ void GTScene::buildBonusScene(bool fastbonus, bool refract) {
     fclose(fp2);
   }
   else {  // fast bonus
-    FILE *fp1;
-    FILE *fp2;
-    char f1name[32], f2name[32];
-
-    // chess1
-    strcpy(f1name, "chess_pieces/bishop_hires.smf");
-    printf("Opening %s\n", f1name);
-    if (!(fp1 = fopen(f1name, "r"))) {
-      printf("Unable to open file '%s'\n", f1name);
+    FILE *fp;
+    char fname[32];
+    strcpy(fname, "chess_pieces/chess_hires.smf");
+    printf("Opening %s\n", fname);
+    if (!(fp = fopen(fname, "r"))) {
+      printf("Unable to open file '%s'\n", fname);
       return;
     }
-    buildFastModelFromFile(fp1, refract, vec3(-1.0f, -1.0f, -2.0f), 20);
-    fclose(fp1);
-
-    // chess2
-    strcpy(f2name, "chess_pieces/chess_hires.smf");
-    printf("Opening %s\n", f2name);
-    if (!(fp2 = fopen(f2name, "r"))) {
-      printf("Unable to open file '%s'\n", f2name);
-      return;
-    }
-    buildFastModelFromFile(fp2, refract, vec3(0.0f, -1.0f, -5.5f), 3);
-    fclose(fp2);
+    buildFastModelFromFile(fp, refract, vec3(0.0f, -1.0f, -5.5f), 3);
+    fclose(fp);
   }
 
   //chessboard
