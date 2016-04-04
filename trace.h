@@ -1,1 +1,0 @@
-void ray_trace();

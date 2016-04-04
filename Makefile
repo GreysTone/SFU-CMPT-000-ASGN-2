@@ -16,10 +16,10 @@
 INCLUDEDIR=/usr/include/
 LIBDIR=/usr/lib
 
-# If you have more source files add them here 
+# If you have more source files add them here
 SOURCE= raycast.cpp include/InitShader.cpp gtObject.cpp gtScene.cpp gtTracer.cpp
 
-# The compiler we are using 
+# The compiler we are using
 CC= g++
 
 # The flags that will be used to compile the object file.
@@ -27,23 +27,23 @@ CC= g++
 # you can add '-g' on the following line
 CFLAGS= -O3 -std=c++0x -g -Wall -pedantic -DGL_GLEXT_PROTOTYPES -pg -fopenmp
 
-# The name of the final executable 
+# The name of the final executable
 EXECUTABLE= raycast
 
 # The basic library we are using add the other libraries you want to link
-# to your program here 
+# to your program here
 
 # Linux (default)
 LDFLAGS = -lGL -lglut -lGLEW -lXext -lX11 -lm
 
-# If you have other library files in a different directory add them here 
+# If you have other library files in a different directory add them here
 INCLUDEFLAG= -I. -I$(INCLUDEDIR) -Iinclude/
 LIBFLAG= -L$(LIBDIR)
 
-# Don't touch this one if you don't know what you're doing 
+# Don't touch this one if you don't know what you're doing
 OBJECT= $(SOURCE:.cpp=.o)
 
-# Don't touch any of these either if you don't know what you're doing 
+# Don't touch any of these either if you don't know what you're doing
 all: $(OBJECT) depend
 	$(CC) $(CFLAGS) $(INCLUDEFLAG) $(LIBFLAG)  $(OBJECT) -o $(EXECUTABLE) $(LDFLAGS)
 
