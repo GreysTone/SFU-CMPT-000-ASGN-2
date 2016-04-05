@@ -218,8 +218,51 @@ float GTTriangle::groupIntersect(vec3 eye, vec3 ray, vec3 *hit) {
 }
 
 bool GTTriangle::isInCubeRange(vec3 min, vec3 max) {
+  // fast detected
   for (int i = 0; i < 3; i++) {
     if (GTCalc::lowerequal(vertex[i], max) && GTCalc::greaterequal(vertex[i], min))
+      return true;
+  }
+//  return false;
+
+  GTBoundary testCube;
+  float xl = max.x - min.x;
+  float yl = max.y - min.y;
+  float zl = max.z - min.z;
+  float cx = (min.x + max.x) / 2;
+  float cy = (min.y + max.y) / 2;
+  float cz = (min.z + max.z) / 2;
+  vec3 xaxis(1, 0, 0), yaxis(0, 1, 0), zaxis(0, 0, 1);
+
+  testCube.box[0].position = vec3(cx, cy, max.z);
+  testCube.box[0].normal = zaxis;
+  testCube.box[1].position = vec3(cx, cy, min.z);
+  testCube.box[1].normal = -zaxis;
+  testCube.box[2].position = vec3(max.x, cy, cz);
+  testCube.box[2].normal = xaxis;
+  testCube.box[3].position = vec3(min.x, cy, cz);
+  testCube.box[3].normal = -xaxis;
+  testCube.box[4].position = vec3(cx, max.y, cz);
+  testCube.box[4].normal = yaxis;
+  testCube.box[5].position = vec3(cx, min.y, cz);
+  testCube.box[5].normal = -yaxis;
+
+  for(int i = 0; i < 6; i++) {
+    testCube.box[i].xLength = xl;
+    testCube.box[i].yLength = yl;
+    testCube.box[i].zLength = zl;
+  }
+
+  vec3 ray[6], eye[6];
+  ray[0] = vertex[1] - vertex[0];  eye[0] = vertex[0];
+  ray[1] = vertex[2] - vertex[0];  eye[1] = vertex[0];
+  ray[2] = vertex[0] - vertex[1];  eye[2] = vertex[1];
+  ray[3] = vertex[2] - vertex[1];  eye[3] = vertex[1];
+  ray[4] = vertex[0] - vertex[2];  eye[4] = vertex[2];
+  ray[5] = vertex[1] - vertex[2];  eye[5] = vertex[2];
+
+  for(int i = 0; i < 6; i++) {
+    if(testCube.isRayIntersected(eye[i], ray[i]))
       return true;
   }
   return false;
@@ -477,6 +520,17 @@ GTOctTree *GTBoundary::locateTree(GTOctTree *tree, vec3 position) {
       return locateTree(&(tree->space[i]), position);
   }
   return NULL;
+}
+
+bool GTBoundary::isRayIntersected(vec3 eye, vec3 ray) {
+  vec3 hit;
+  for (int i = 0; i < 6; i++) {
+    float t = box[i].intersect(eye, ray, &hit, 0);
+    if (t > GTCalc::precision) {
+      return true;
+    }
+  }
+  return false;
 }
 
 

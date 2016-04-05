@@ -9,5 +9,6 @@ core
 data
 depend
 raycast
+raychess
 
 CMakeLists.txt

@@ -189,6 +189,7 @@ public:
 
   void getIntersectingObject(vec3 eye, vec3 ray, std::vector<GTModel *> *container);
   GTOctTree *locateTree(GTOctTree *tree, vec3 position);
+  bool isRayIntersected(vec3 eye, vec3 ray);
 };
 
 #endif /* gtObject_hpp */
