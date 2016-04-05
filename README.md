@@ -39,11 +39,11 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 ## Acceleration in Bonus Implementation
 * Speed compare (option 'bonus 5' & 'fbonus 5')
   * without any accelerations: **more than 1 hour**
-  * active all accelerations: **less than 1.5 minute**
+  * active all accelerations: **less than 3 minute**
 
 
 * **Parallel programming** with *OpenMP*
-  * Using *OpenMP* for multi-threads processing the scene, in tested machine, it open 4 threads processing the whole image. Each threads takes one-forth workloads.
+  * Using *OpenMP* for multi-threads processing the scene, in tested machine, it open 4 threads (according to your computer) processing the whole image. Each threads takes one-forth workloads.
 * **Object Boundary Box** accelerations
   * The virtual object **GT_Boundary** is load into the scene, it bound the chess, and implement the interface for intersection and refraction. Internally, it contains an OctTree.
 * A simple **OctTree** implementation
