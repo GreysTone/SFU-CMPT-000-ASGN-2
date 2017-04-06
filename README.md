@@ -6,9 +6,9 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 
 ***Author: Danyang Song (Arthur)***
 
-*More details on completing this project, see https://github.com/GreysTone/SFU-CMPT-000-ASGN-2.*
+*For more details on completing this project, see https://github.com/GreysTone/SFU-CMPT-000-ASGN-2.*
 
-***All steps (all functions) are implemented in the assignment, extra information are shown as below.***
+***All steps (all functions) are implemented in the assignment, extra information is shown as below.***
 
 ***Bonus Completed***
 
@@ -39,17 +39,17 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 ## Acceleration in Bonus Implementation
 * Speed compare (option 'bonus 5' & 'fbonus 5')
   * without any accelerations: **more than 1 hour**
-  * active all accelerations: **less than 3 minute**
+  * active all accelerations: **less than 3 minutes**
 
 
 * **Parallel programming** with *OpenMP*
-  * Using *OpenMP* for multi-threads processing the scene, in tested machine, it open 4 threads (according to your computer) processing the whole image. Each threads takes one-forth workloads.
+  * *OpenMP* enables multithreaded scene processing. 4 threads are opened to process the whole image on the tested machine. Each thread takes one-quarter of the workloads.
 * **Object Boundary Box** accelerations
-  * The virtual object **GT_Boundary** is load into the scene, it bound the chess, and implement the interface for intersection and refraction. Internally, it contains an OctTree.
+  * The virtual object **GT_Boundary** is loaded into the scene. It binds the chess and implements the interface for intersection and refraction. Internally, it contains an OctTree.
 * A simple **OctTree** implementation
-  * A simple OctTree separates the boundary box into 8 sub-area, in order to reduce the number of triangle meshes during the intersection.
+  * A simple OctTree separates the boundary box into 8 sub-areas in order to reduce the number of triangle meshes during the intersection.
 * **Object Internal** intersection in refraction
-  * Also, the refraction process only considers about the whole object itself, thus this reduce calculation between the ray and others.
+  * The refraction process takes only the object itself into account, which reduces calculation between the ray and others.
 
 ## Features
 * ***Parallel*** (with **'-fopenmp'** compile option)
@@ -62,7 +62,7 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 * **Polymorphism**
 
 ## Options Description
-* render bonus part using:
+* Render bonus part using:
       ./raychess bonus step_max      # normal bonus rendering
       ./raychess fbonus step_max     # active all accelerations
 * Since I open the parallel features, the statistic number of intersection is ignored, while there is also an approximate number in **profiling report** (shown as below).
