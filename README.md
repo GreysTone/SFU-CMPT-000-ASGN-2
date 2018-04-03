@@ -14,7 +14,7 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 
 ******
 
-## Compile, Deploy & OS Environment
+## Compilation, Deployment & OS Environment
 * Linux (**tested on Ubuntu 14.04.03 LTS in VMware 8**)
     * Dependency: glew, freeglut3, mesa (possibly others needed)
     * In an initial environment
@@ -39,7 +39,7 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 
   <img src="default.bmp" />
 
-* All options scene (./raychess -u 5 +s +l +r +f +c +p)
+* All options enabled scene (./raychess -u 5 +s +l +r +f +c +p)
 
   <img src="mine.bmp" />
 
@@ -50,11 +50,11 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
 ## Acceleration in Bonus Implementation
 * Speed comparison (option 'bonus 5' & 'fbonus 5')
   * without any accelerations: **more than 1 hour**
-  * active all accelerations: **less than 3 minutes**
+  * with all accelerations activated: **less than 3 minutes**
 
 
 * **Parallel programming** with *OpenMP*
-  * *OpenMP* enables multithreaded scene processing. 4 threads are opened to process the whole image on the tested machine. Each thread takes one-quarter of the workloads.
+  * *OpenMP* enables multithreaded scene processing. 4 threads are created to process the whole image. Each thread takes one-quarter of the workloads.
 * **Object Boundary Box** accelerations
   * The virtual object **GT_Boundary** is loaded into the scene. It binds the chess and implements the interface for intersection and refraction. Internally, it contains an OctTree.
 * A simple **OctTree** implementation
@@ -78,23 +78,23 @@ Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f
    ./raychess bonus step_max      # normal bonus rendering
    ./raychess fbonus step_max     # active all accelerations
    ~~~
-* Since I open the parallel features, the statistic number of intersection is ignored, while there is also an approximate number in **profiling report** (shown as below).
+* Since I enable the parallel features, the statistic number of intersection is ignored, while there is also an approximate number in **profiling report** (shown as below).
 * **'bonus'** or **'fbonus'** will automatically tigger *shadow*, *refraction*, *recursive reflection*, *chessboard*, *stochastic diffuse* and *antialias*
 
 ## Profiling
 * Valgrind(**callgrind.out.[id]**) & gprof(**gmon.out**)
-* Report for no any accelerations:
+* Report for no acceleration:
 
 <img src="report.png" />
 
 ## MACRO Description
 * global.h
-  * **OCT_OUTPUT** showing OctTree's basic information
-  * **OCT_REDUCE_MEM** reducing the cost of memory of building OctTree
-  * **SHOW_PROGRESS** showing the progress on different threads
-  * **GT_PARALLEL** enabling parallel features
+  * **OCT_OUTPUT** shows OctTree's basic information
+  * **OCT_REDUCE_MEM** reduces the cost of memory of building OctTree
+  * **SHOW_PROGRESS** shows the progress on different threads
+  * **GT_PARALLEL** enables parallel features
 
 
 ## Some Comments
 * Parallel computation is not balanced, due to different scene data
-* Only implemented OctTree for 1 level, but it still accelerates the rendering a lot
+* OctTree is only implemented for 1 level, but it still accelerates the rendering a lot
