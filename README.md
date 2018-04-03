@@ -1,12 +1,12 @@
 # Ray Tracer
 
-Assignment 3 for *Intros to CG*
+Assignment 3 for *Intros to Computer Graphics*
 
 Based on "Skeleton Code" (the first submit 73aa6c449734ae26ad8a92af5e2c7d49fa88f15b).
 
 ***Author: Danyang Song (Arthur)***
 
-*For more details on completing this project, see https://github.com/GreysTone/SFU-CMPT-000-ASGN-2.*
+*For more details about this project, see https://github.com/GreysTone/SFU-CMPT-000-ASGN-2.*
 
 ***All steps (all functions) are implemented in the assignment. Extra information is shown as below.***
 
